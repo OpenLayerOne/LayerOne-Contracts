@@ -76,7 +76,7 @@ contract Crowdsale721 {
 
     emit LandsalePurchase(msg.sender, _beneficiary, weiAmount, uint8(_tokenIds.length));
 
-    forwardFunds(); // calls up to refundable crowdsale
+    forwardFunds();
 
     // mint externally on mintable crowdsale
     nftContract_.mint(_beneficiary, _tokenIds);

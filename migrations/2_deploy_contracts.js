@@ -32,27 +32,23 @@ const makeQuadKey = function (token) {
 
 async function deployLandSale(deployer, landSaleOwner) {
   const cap = ether(10000)
-  const presaleStart = latestTime() + duration.days(1)
-  const presaleEnd = presaleStart + duration.days(1)
   const startTime = presaleEnd + duration.seconds(1)
-  const endTime = startTime + duration.days(35)
-  const startPrice = ether(0.035)
-  const endPrice = ether(0.005)
-  const presaleSpots = 5000
+  const endTime = startTime + duration.days(16)
+  const startPrice = ether(1)
+  const endPrice = ether(0)
+  const minTilesSold = 100000
   const land = LayerOneLand.address
 
   return deployer.deploy(
     Capped721DutchCrowdsale,
     cap,
-    presaleStart,
-    presaleEnd,
     startTime,
     endTime,
     startPrice,
     endPrice,
     landSaleOwner,
     land,
-    presaleSpots,
+    minTilesSold,
     { from: landSaleOwner, gas })
 }
 

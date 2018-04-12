@@ -20,11 +20,8 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
     mapping (address => uint32) public _whitelistedUsers;
 
     // Number of remaining whitelisted user slots
-    uint32 public presaleSpotsRemaining = 400;
-    uint32 public presaleSpotsTaken = 0;
-
-    uint256 public presaleStart;
-    uint256 public presaleEnd;
+    uint32 public minTilesSold = 100000;
+    uint32 public numTilesSold = 0;
 
     uint256 public endPrice;
 
@@ -42,32 +39,28 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
     */
     function Capped721DutchCrowdsale(
         uint256 _cap,
-        uint256 _presaleStart,
-        uint256 _presaleEnd,
         uint256 _landsaleStart,
         uint256 _landsaleEnd,
         uint256 _startPrice,
         uint256 _endPrice,
         address _wallet,
         address _nftContract, 
-        uint32 _presaleSpots
+        uint32 _minTilesSold
     ) 
         Crowdsale721(_landsaleStart, _landsaleEnd, _startPrice, _wallet, _nftContract)
         public 
     {
         require(_cap > 0);
         cap = _cap;
-        presaleStart = _presaleStart;
-        presaleEnd = _presaleEnd;
-        presaleSpotsRemaining = _presaleSpots;
+        minTilesSold = _minTilesSold;
         endPrice = _endPrice;
     }
 
     // overriding Crowdsale#hasEnded to add cap logic
     // @return true if crowdsale event has ended
     function hasEnded() public view returns (bool) {
-        bool capReached = weiRaised >= cap;
-        return capReached || super.hasEnded();
+
+        return (weiRaised >= cap && minTilesSold >= nftContract_.totalSupply());
     }
 
     function validPurchase(uint64[] _tokenIds) 
@@ -82,36 +75,8 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
             // require valid zoom 16 quad key
             require(QuadkeyLib.isZoom(_tokenIds[x], 16));
         }
-        
-        if (isPresaleActive()) {
-            //ensure sender is whitelisted
-            return (_whitelistedUsers[msg.sender] > 0);
-        }
 
         return super.validPurchase(_tokenIds);
-    }
-
-    // overriding Crowdsale#validPurchase to add extra cap logic
-    // @return true if investors can buy at the moment
-    function isPresaleActive() 
-        public 
-        view 
-        returns (bool) 
-    {
-        return (now < presaleEnd && now >= presaleStart);
-    }
-
-    function reservePresaleSpot()
-        public
-    {
-        require(now < presaleStart);
-        require(presaleSpotsRemaining > 0);
-        if (_whitelistedUsers[msg.sender] == 0) {
-            presaleSpotsRemaining = uint32(presaleSpotsRemaining.sub(1));
-            _whitelistedUsers[msg.sender] = presaleSpotsRemaining;
-            presaleSpotsTaken = uint32(presaleSpotsTaken.add(1));
-            emit PresaleSpotReserved(msg.sender, presaleSpotsTaken);
-        }
     }
 
     // calculates dutch auction price from start of presale to now

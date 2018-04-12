@@ -9,8 +9,9 @@ library QuadkeyLib {
     
     // This masks the last 5 bits of the quadkey which is where the zoom storage is
     uint8 constant ZOOM_MASK = 31;
-    // 23 is the max zoom allowed in quadkey mapping
-    uint8 constant MAX_ZOOM = 28;
+    
+    // 29 is the max zoom allowed in quadkey mapping
+    uint8 constant MAX_ZOOM = 29;
 
     /*
         Will create mask to be used check if quadkey match zoom of a given level
