@@ -19,19 +19,10 @@ contract QuadToken is Batchable721Token {
   {
   }
 
-  modifier validateQuadKeys(uint64[] _quadKeys)
-  {
-      for (uint i = 0; i < _quadKeys.length; i++) {
-          require(QuadkeyLib.isValidQuadkey(_quadKeys[i]));
-      }
-      _;
-  }
-
   function publicMinting(
       address _beneficiary,
       uint64[] _tokenIds
   )
-    validateQuadKeys(_tokenIds)
     limitBatchSize(_tokenIds)
     whenNotPaused
     isMintingOn
