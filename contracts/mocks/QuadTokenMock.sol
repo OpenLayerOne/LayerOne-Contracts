@@ -1,15 +1,15 @@
 pragma solidity >=0.4.18;
 
-import "../tokens/LayerOneLand.sol";
+import "../tokens/QuadToken.sol";
 
 // mock class using BasicToken
-contract LayerOneLandMock is LayerOneLand {
-  function LayerOneLandMock(  
+contract QuadTokenMock is QuadToken {
+  function QuadTokenMock(  
       uint64[] _tokenIds,
       address owner
     ) 
     public 
-    LayerOneLand()
+    QuadToken()
   {
     mint(owner, _tokenIds);
   }

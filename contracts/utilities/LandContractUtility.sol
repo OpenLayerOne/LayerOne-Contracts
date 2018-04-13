@@ -1,10 +1,10 @@
 pragma solidity >=0.4.18;
 
-import "../tokens/LayerOneLand.sol";
+import "../tokens/QuadToken.sol";
 import "../governance/PriceGoverning.sol";
 
 contract LandContractUtility is PriceGoverning {
-    LayerOneLand public landContract;
+    QuadToken public landContract;
     uint256 public pendingSaleValue;
 
     /**
@@ -32,7 +32,7 @@ contract LandContractUtility is PriceGoverning {
         @param _landContract - address of the nft contract
     */
     function setNFTLandContract(address _nftAddress) internal {
-        LayerOneLand candidateContract = LayerOneLand(_nftAddress);
+        QuadToken candidateContract = QuadToken(_nftAddress);
         // bytes4 ERC721 = candidateContract.InterfaceSignature_ERC721();
         // // require(candidateContract.supportsInterface(ERC721));
         landContract = candidateContract;
@@ -55,7 +55,7 @@ contract LandContractUtility is PriceGoverning {
     }
 
     // TODO make right
-    bytes4 constant InterfaceSignature_LayerOneLandContract = 0x51123123;
+    bytes4 constant InterfaceSignature_QuadTokenContract = 0x51123123;
     /*
     TODO:
     bytes4(keccak256('withdrawBalance()')) ^
@@ -78,7 +78,7 @@ contract LandContractUtility is PriceGoverning {
     {
         // return true;
         return ((_interfaceID == landContract.InterfaceSignature_ERC165()) 
-        || (_interfaceID == InterfaceSignature_LayerOneLandContract));
+        || (_interfaceID == InterfaceSignature_QuadTokenContract));
     }
 
 }

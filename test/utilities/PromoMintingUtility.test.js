@@ -2,7 +2,7 @@
 import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert';
 import ether from 'zeppelin-solidity/test/helpers/ether';
 var PromoMintingUtility= artifacts.require('utilities/minting/PromoMintingUtility.sol');
-var LayerOneLand = artifacts.require('mocks/LayerOneLand.sol');
+var QuadToken = artifacts.require('mocks/QuadToken.sol');
 const BigNumber = web3.BigNumber;
 var gas = 6721971;
 const should = require('chai')
@@ -15,7 +15,7 @@ contract("PromoMintingUtility", function([_, investor, owner]) {
     beforeEach(async function() {
         this.tokenIds = [1,123212,3452345];
         this.promoIds = [180105104810,332499758092,332499758092];
-        this.land = await LayerOneLand.new({from: owner, gas: gas});
+        this.land = await QuadToken.new({from: owner, gas: gas});
         this.minting = await PromoMintingUtility.new(this.land.address, {from: owner, gas: gas});
     });
 

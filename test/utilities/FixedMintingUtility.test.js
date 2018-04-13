@@ -2,7 +2,7 @@
 import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert';
 import ether from 'zeppelin-solidity/test/helpers/ether';
 var FixedMintingUtility= artifacts.require('utilities/minting/FixedMintingUtility.sol');
-var LayerOneLand = artifacts.require('mocks/LayerOneLand.sol');
+var QuadToken = artifacts.require('mocks/QuadToken.sol');
 const BigNumber = web3.BigNumber;
 var gas = 6721971;
 const should = require('chai')
@@ -14,7 +14,7 @@ const should = require('chai')
 contract("FixedMintingUtility", function([_, investor, coreOwner]) {
     beforeEach(async function() {
         this.tokenIds = [1,123212,3452345];
-        this.land = await LayerOneLand.new({from: coreOwner, gas: gas});
+        this.land = await QuadToken.new({from: coreOwner, gas: gas});
         this.minting = await FixedMintingUtility.new(this.land.address, {from: coreOwner, gas: gas});
         this.price = new BigNumber(await this.minting.fixedPrice());
     });

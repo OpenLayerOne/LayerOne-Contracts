@@ -7,6 +7,6 @@ Layer One Smart Contracts
 * From command prompt install libraries:
 `%> yarn`
 * Test something:
-`%> truffle test test/token/LayerOneLand.test.js`
+`%> truffle test test/token/QuadToken.test.js`
 
 

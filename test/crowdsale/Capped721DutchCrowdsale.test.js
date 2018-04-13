@@ -7,7 +7,7 @@ import { increaseTimeTo, duration } from 'zeppelin-solidity/test/helpers/increas
 const BinaryQuadkey = require('binaryquadkey')
 
 const Capped721DutchCrowdsale = artifacts.require('Capped721DutchCrowdsale.sol')
-const LayerOneLand = artifacts.require('LayerOneLand.sol')
+const QuadToken = artifacts.require('QuadToken.sol')
 const BigNumber = web3.BigNumber
 
 const should = require('chai')
@@ -40,7 +40,7 @@ contract('Capped721DutchCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWall
     this.afterStart = this.startTime + duration.seconds(1)
     this.endTime = this.startTime + duration.weeks(9)
     this.afterEndTime = this.endTime + duration.seconds(1)
-    this.token = await LayerOneLand.new({ from: nftOwner, gasPrice: 0 })
+    this.token = await QuadToken.new({ from: nftOwner, gasPrice: 0 })
     this.startPrice = ether(2)
     this.endPrice = ether(1)
     this.presaleSpots = 2

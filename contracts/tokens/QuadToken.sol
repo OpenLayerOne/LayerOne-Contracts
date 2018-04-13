@@ -4,7 +4,7 @@ import "./Batchable721Token.sol";
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../libraries/QuadkeyLib.sol";
 
-contract LayerOneLand is Batchable721Token {
+contract QuadToken is Batchable721Token {
   using SafeMath for uint256;
 
   // Contracts or people that own data protocols on the 
@@ -13,9 +13,9 @@ contract LayerOneLand is Batchable721Token {
 
   event MetadataUpdated(uint32 indexed protocol, uint64 indexed tokenId, address indexed owner);
 
-  function LayerOneLand() 
+  function QuadToken() 
     public 
-    ERC721Token("LayerOneLand", "L1L")
+    ERC721Token("QuadToken", "QUAD")
   {
   }
 

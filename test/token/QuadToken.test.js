@@ -2,7 +2,7 @@ import assertRevert from 'zeppelin-solidity/test/helpers/assertRevert'
 import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert'
 import { advanceBlock } from 'zeppelin-solidity/test/helpers/advanceToBlock'
 
-const LayerOneLand = artifacts.require('LayerOneLand.sol')
+const QuadToken = artifacts.require('QuadToken.sol')
 const BigNumber = web3.BigNumber
 const BinaryQuadkey = require('binaryquadkey')
 
@@ -11,7 +11,7 @@ const should = require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-contract('LayerOneLand', ([_, owner0, owner1, owner2, recipient]) => {
+contract('QuadToken', ([_, owner0, owner1, owner2, recipient]) => {
   const qk1 = new BinaryQuadkey.fromQuadkey("0231010202322300");
   const qk2 = new BinaryQuadkey.fromQuadkey("0331010202322300");
   const tile1 = qk1.toString()
@@ -24,7 +24,7 @@ contract('LayerOneLand', ([_, owner0, owner1, owner2, recipient]) => {
   })
 
   beforeEach(async function _() {
-    this.token = await LayerOneLand.new({ from: owner0, gasPrice: 0 })
+    this.token = await QuadToken.new({ from: owner0, gasPrice: 0 })
     await this.token.setMintingOn(true, {from: owner0, gasPrice: 0})
   })
 
