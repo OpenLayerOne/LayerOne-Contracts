@@ -13,12 +13,11 @@ const should = require('chai')
   .should()
 
 const Crowdsale = artifacts.require('Crowdsale721')
-const Token = artifacts.require('Batchable721Token')
+const Token = artifacts.require('QuadToken')
 
 const t1 = new BinaryQuadkey.fromQuadkey('02310102301')
 const t2 = new BinaryQuadkey.fromQuadkey('02310102302')
 const t3 = new BinaryQuadkey.fromQuadkey('02310102303')
-const c1 = new BinaryQuadkey.fromQuadkey('02310102')
 
 const tokens = [t1.toString(), t2.toString(), t3.toString()]
 contract('Crowdsale', ([_, nftOwner, investor, purchaser, crowdsaleWallet]) => {
@@ -41,7 +40,6 @@ contract('Crowdsale', ([_, nftOwner, investor, purchaser, crowdsaleWallet]) => {
     this.token = await Token.new({ from: nftOwner, gasPrice: 0 })
     this.crowdsale = await Crowdsale.new(this.startTime, this.endTime, price, crowdsaleWallet, this.token.address, { from: nftOwner, gasPrice: 0 })
     await this.token.setApprovedMinter(this.crowdsale.address, true, { from: nftOwner, gasPrice: 0 })
-    this.cityId = c1.toString()
     this.price = await this.crowdsale.startPrice()
     this.cost = this.price * tokens.length
   })
@@ -56,17 +54,17 @@ contract('Crowdsale', ([_, nftOwner, investor, purchaser, crowdsaleWallet]) => {
 
   describe('accepting payments', () => {
     it('should reject payments before start', async function () {
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { from: purchaser, value: this.cost }).should.be.rejectedWith(EVMRevert)
+      await this.crowdsale.buyTokens(tokens, investor, { from: purchaser, value: this.cost }).should.be.rejectedWith(EVMRevert)
     })
 
     it('should accept payments after start', async function () {
       await increaseTimeTo(this.afterStartTime)
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: purchaser }).should.be.fulfilled
+      await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: purchaser }).should.be.fulfilled
     })
 
     it('should reject payments after end', async function () {
       await increaseTimeTo(this.afterEndTime)
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: purchaser }).should.be.rejectedWith(EVMRevert)
+      await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: purchaser }).should.be.rejectedWith(EVMRevert)
     })
   })
 
@@ -76,7 +74,7 @@ contract('Crowdsale', ([_, nftOwner, investor, purchaser, crowdsaleWallet]) => {
     })
 
     it('should log purchase', async function () {
-      const { logs } = await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: investor })
+      const { logs } = await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: investor })
       const event = logs.find(e => e.event === 'LandsalePurchase')
 
       should.exist(event)
@@ -87,20 +85,20 @@ contract('Crowdsale', ([_, nftOwner, investor, purchaser, crowdsaleWallet]) => {
     })
 
     it('should increase totalSupply', async function () {
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: investor })
+      await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: investor })
       const totalSupply = await this.token.totalSupply()
       totalSupply.should.be.bignumber.equal(expectedTokenAmount)
     })
 
     it('should assign tokens to sender', async function () {
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: investor })
+      await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: investor })
       const balance = await this.token.balanceOf(investor)
       balance.should.be.bignumber.equal(expectedTokenAmount)
     })
 
     it('should forward funds to the owner of the contract', async function () {
       const pre = web3.eth.getBalance(crowdsaleWallet)
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: investor })
+      await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: investor })
       const post = web3.eth.getBalance(crowdsaleWallet)
       post.minus(pre).should.be.bignumber.equal(this.cost)
     })
@@ -112,7 +110,7 @@ contract('Crowdsale', ([_, nftOwner, investor, purchaser, crowdsaleWallet]) => {
     })
 
     it('should log purchase', async function () {
-      const { logs } = await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: purchaser })
+      const { logs } = await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: purchaser })
 
       const event = logs.find(e => e.event === 'LandsalePurchase')
 
@@ -124,20 +122,20 @@ contract('Crowdsale', ([_, nftOwner, investor, purchaser, crowdsaleWallet]) => {
     })
 
     it('should increase totalSupply', async function () {
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: purchaser })
+      await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: purchaser })
       const totalSupply = await this.token.totalSupply()
       totalSupply.should.be.bignumber.equal(expectedTokenAmount)
     })
 
     it('should assign tokens to beneficiary', async function () {
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: purchaser })
+      await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: purchaser })
       const balance = await this.token.balanceOf(investor)
       balance.should.be.bignumber.equal(expectedTokenAmount)
     })
 
     it('should forward funds to the contract owner', async function () {
       const pre = web3.eth.getBalance(crowdsaleWallet)
-      await this.crowdsale.buyTokens(tokens, this.cityId, investor, { value: this.cost, from: purchaser })
+      await this.crowdsale.buyTokens(tokens, investor, { value: this.cost, from: purchaser })
       const post = web3.eth.getBalance(crowdsaleWallet)
       post.minus(pre).should.be.bignumber.equal(this.cost)
     })
