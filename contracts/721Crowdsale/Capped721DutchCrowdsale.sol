@@ -10,7 +10,7 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
     using SafeMath for uint256;
     using SafeMath for uint64;
     using SafeMath for uint32;
-
+    
     event PresaleSpotReserved(address indexed user, uint32 presaleSpotsTaken);
 
     /* 
@@ -59,8 +59,7 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
     // overriding Crowdsale#hasEnded to add cap logic
     // @return true if crowdsale event has ended
     function hasEnded() public view returns (bool) {
-
-        return (weiRaised >= cap && minTilesSold >= nftContract_.totalSupply());
+        return (weiRaised >= cap || nftContract_.totalSupply() >= minTilesSold );
     }
 
     function validPurchase(uint64[] _tokenIds) 
@@ -68,6 +67,7 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
         view 
         returns (bool) 
     {
+
         // make sure we are not ended
         require(hasEnded() == false);
 
@@ -76,7 +76,10 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
             require(QuadkeyLib.isZoom(_tokenIds[x], 16));
         }
 
-        return super.validPurchase(_tokenIds);
+        bool correctPayment = msg.value >= price(_tokenIds);
+        bool withinPeriod = now >= startTime;
+
+        return correctPayment && withinPeriod;
     }
 
     // calculates dutch auction price from start of presale to now
