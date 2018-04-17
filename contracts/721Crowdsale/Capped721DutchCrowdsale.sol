@@ -8,20 +8,9 @@ import "../libraries/DutchAuctionLib.sol";
 contract Capped721DutchCrowdsale is Crowdsale721 {
 
     using SafeMath for uint256;
-    using SafeMath for uint64;
-    using SafeMath for uint32;
     
-    event PresaleSpotReserved(address indexed user, uint32 presaleSpotsTaken);
-
-    /* 
-        A certain amount of whitelisted users can be added per city to be
-        allowed to purchase land earlier than the general public.
-    */
-    mapping (address => uint32) public _whitelistedUsers;
-
     // Number of remaining whitelisted user slots
     uint32 public minTilesSold = 100000;
-    uint32 public numTilesSold = 0;
 
     uint256 public endPrice;
 
@@ -38,19 +27,20 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
         @param _nftContract The contract that holds the tile ownership information
     */
     function Capped721DutchCrowdsale(
+        uint32 _minTilesSold,
         uint256 _cap,
         uint256 _landsaleStart,
         uint256 _landsaleEnd,
         uint256 _startPrice,
         uint256 _endPrice,
         address _wallet,
-        address _nftContract, 
-        uint32 _minTilesSold
+        address _nftContract
     ) 
         Crowdsale721(_landsaleStart, _landsaleEnd, _startPrice, _wallet, _nftContract)
         public 
     {
         require(_cap > 0);
+        
         cap = _cap;
         minTilesSold = _minTilesSold;
         endPrice = _endPrice;

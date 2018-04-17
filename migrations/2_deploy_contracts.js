@@ -24,7 +24,7 @@ function ether(n) {
 }
 
 const BigNumber = web3.BigNumber
-const gas = 6721975
+const gas = 4000000
 
 const makeQuadKey = function (token) {
   return new BinaryQuadkey.fromQuadkey(token).toString()
@@ -38,9 +38,9 @@ async function deployLandSale(deployer, landSaleOwner) {
   const endPrice = ether(0)
   const minTilesSold = 100000
   const land = QuadToken.address
-
   return deployer.deploy(
     Capped721DutchCrowdsale,
+    minTilesSold,
     cap,
     startTime,
     endTime,
@@ -48,14 +48,13 @@ async function deployLandSale(deployer, landSaleOwner) {
     endPrice,
     landSaleOwner,
     land,
-    minTilesSold,
-    { from: landSaleOwner, gas })
+    { from: landSaleOwner })
 }
 
 
 async function deployPromoUtility(deployer, landSaleOwner) {
   const address = QuadToken.address
-  return deployer.deploy(PromoMintingUtility, address, { from: landSaleOwner, gas })
+  return deployer.deploy(PromoMintingUtility, address, { from: landSaleOwner })
 }
 
 
@@ -69,7 +68,7 @@ async function deployLibraries(deployer) {
 
 module.exports = async function _(deployer, network, [owner]) {
   return deployLibraries(deployer).then(async () => {
-    return deployer.deploy(QuadToken, { from: owner, gas })
+    return deployer.deploy(QuadToken, { from: owner })
   }).then(() => {
     return deployLandSale(deployer, owner)
   }).catch(console.log)
