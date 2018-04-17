@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
-import "../tokens/QuadToken.sol";
+import "../tokens/Batchable721Token.sol";
 
 /**
  * @title Crowdsale721
@@ -31,7 +31,7 @@ contract Crowdsale721 {
   // This token exposes minting on the 721 standard token contract
   // Either be owner of the NFT contract for minting purposes, 
   // or share the same owner to allow minting from here
-  QuadToken public nftContract_;
+  Batchable721Token public nftContract_;
 
   /* 
     @dev This contract owns the token contract until the ILO is over
@@ -51,7 +51,7 @@ contract Crowdsale721 {
     startTime = _startTime;
     endTime = _endTime;
     startPrice = _price;
-    nftContract_ = QuadToken(_nftContract);
+    nftContract_ = Batchable721Token(_nftContract);
   }
   
   event LandsalePurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint8 numTokens);

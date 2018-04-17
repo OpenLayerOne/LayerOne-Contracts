@@ -45,6 +45,7 @@ contract('Capped721DutchCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWall
     this.endPrice = ether(0)
     this.tilesToSell = 5
     this.crowdsale = await Capped721DutchCrowdsale.new(
+      this.tilesToSell,
       cap,
       this.startTime,
       this.endTime,
@@ -52,7 +53,6 @@ contract('Capped721DutchCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWall
       this.endPrice,
       crowdsaleWallet,
       this.token.address,
-      this.tilesToSell,
       { from: crowdsaleOwner, gasPrice: 0 })
       this.pricePerToken = await this.crowdsale.price([t1])
 
@@ -89,7 +89,7 @@ contract('Capped721DutchCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWall
     it('should not be ended if under cap', async function () {
       let hasEnded = await this.crowdsale.hasEnded()
       hasEnded.should.equal(false)
-      await this.crowdsale.buyTokens([t1], tokenOwner, { value: this.pricePerToken })
+      await this.crowdsale.buyTokens([t1], tokenOwner, { value: this.pricePerToken }).should.be.fulfilled
       hasEnded = await this.crowdsale.hasEnded()
       hasEnded.should.equal(false)
     })

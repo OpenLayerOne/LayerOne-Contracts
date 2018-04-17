@@ -48,7 +48,11 @@ async function deployLandSale(deployer, landSaleOwner) {
     endPrice,
     landSaleOwner,
     land,
-    { from: landSaleOwner })
+    { from: landSaleOwner }).then(crowdsale => {
+      return QuadToken.deployed()
+    }).then(token => {
+      return token.setApprovedMinter(Capped721DutchCrowdsale.address, true, {from: landSaleOwner})
+    })
 }
 
 
