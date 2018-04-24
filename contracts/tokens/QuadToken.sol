@@ -8,10 +8,10 @@ contract QuadToken is Batchable721Token {
   using SafeMath for uint256;
 
   // Contracts or people that own data protocols on the 
-  mapping(uint32 => address) internal protocolOwners;
-  mapping (uint64 => mapping (uint32 => string)) internal protocolTokenMetadata;
+  mapping(uint256 => address) internal protocolOwners;
+  mapping (uint64 => mapping (uint256 => string)) internal protocolTokenMetadata;
 
-  event MetadataUpdated(uint32 indexed protocol, uint64 indexed tokenId, address indexed owner);
+  event MetadataUpdated(uint256 indexed protocol, uint64 indexed tokenId, address indexed owner);
 
   function QuadToken() 
     public 
@@ -19,6 +19,11 @@ contract QuadToken is Batchable721Token {
   {
   }
 
+  /*
+    @dev Allows free public minting of zoom level 16 tokens
+    @param _beneficiary - Who gets the token
+    @param _tokenIds - tile tokens.
+  */
   function publicMinting(
       address _beneficiary,
       uint64[] _tokenIds
@@ -29,7 +34,7 @@ contract QuadToken is Batchable721Token {
     public
   {
       for (uint i = 0; i < _tokenIds.length; i++) {
-        require(QuadkeyLib.isValidQuadkey(_tokenIds[i]));
+        require(QuadkeyLib.isZoom(_tokenIds[i], 16));
         // This will assign ownership, and also emit the Transfer event
         _mint(_beneficiary, _tokenIds[i]); 
       }
@@ -41,7 +46,7 @@ contract QuadToken is Batchable721Token {
     @param _metadata - the string metadata associated with tile
   */
   function updateManyTokenMetadata(
-      uint32 _protocol,
+      uint256 _protocol,
       uint64[] _tokenIds,
       string _metadata
   ) 
@@ -60,7 +65,7 @@ contract QuadToken is Batchable721Token {
     @param _owner - who should own this protocol
   */
   function setProtocolOwner(
-    uint32 _protocol,
+    uint256 _protocol,
     address _owner
   ) 
     onlyOwner
@@ -77,7 +82,7 @@ contract QuadToken is Batchable721Token {
     @param _metadata - the string metadata associated with tile
   */
   function updateTokenMetadata(
-    uint32 _protocol,
+    uint256 _protocol,
     uint64 _tokenId, 
     string _metadata
   ) 
@@ -98,7 +103,7 @@ contract QuadToken is Batchable721Token {
     @param _tokenId - the id of the token
   */
   function getTokenMetadata(    
-    uint32 _protocol,
+    uint256 _protocol,
     uint64 _tokenId
   ) 
     public

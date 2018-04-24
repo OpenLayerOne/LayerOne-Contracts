@@ -1,10 +1,12 @@
 import assertRevert from 'zeppelin-solidity/test/helpers/assertRevert'
 import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert'
 import { advanceBlock } from 'zeppelin-solidity/test/helpers/advanceToBlock'
+import Long from 'long'
 
 const QuadToken = artifacts.require('QuadToken.sol')
 const BigNumber = web3.BigNumber
 const BinaryQuadkey = require('binaryquadkey')
+const Quadkey = artifacts.require('libraries/QuadkeyLib.sol');
 
 const should = require('chai')
   .use(require('chai-as-promised'))
@@ -17,6 +19,7 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient]) => {
   const tile1 = qk1.toString()
   const tile2 = qk2.toString()
   const tile3 = (new BinaryQuadkey.fromQuadkey("0331010202322320")).toString()
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
   before(async function _() {
     // Advance to the next block to correctly read time in the solidity "now" function interpreted by testrpc
@@ -32,6 +35,7 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient]) => {
     
     beforeEach(async function _() {
       await this.token.publicMinting(owner0, [tile1])
+      this.qk = await Quadkey.new();
     })
 
     it('should return the correct totalSupply after minting a tile', async function _() {
@@ -56,9 +60,37 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient]) => {
     it('should throw an error when trying to assign existing token in new parcel', async function _() {
       await this.token.publicMinting(owner1, [tile2, tile1]).should.be.rejectedWith(EVMRevert)
     })
-    // it('should be able to assign multiple parcels', async function _() {
+    it('should mint valid quadkeys', async function _() {
+      //Invalid zoom level minting from public endpoint
+      const t23 = (new BinaryQuadkey.fromQuadkey("03310102023223201112221")).toString()
+      await this.token.publicMinting(owner1, [t23]).should.be.rejectedWith(EVMRevert)
 
-    // })
+      const t17 = (new BinaryQuadkey.fromQuadkey("03310102023223201")).toString()
+      await this.token.publicMinting(owner1, [t17]).should.be.rejectedWith(EVMRevert)
+      
+      const t16 = (new BinaryQuadkey.fromQuadkey("0123012301230123")).toString()
+      await this.token.publicMinting(owner1, [t16]).should.be.fulfilled
+
+    })
+
+    it('should log valid minting events', async function _() {
+      const qk = new BinaryQuadkey.fromQuadkey("0123012301230123")
+      const t16 = qk.toString()
+      // console.log("FIRST", qk)
+      // console.log("SECOND", qk.toString())
+      // console.log("THIRD", qk.toQuadkey())
+      const tx = await this.token.publicMinting(owner1, [t16]).should.be.fulfilled
+      const logs = tx.logs
+      logs.length.should.be.equal(1);
+      logs[0].args._from.should.be.equal(ZERO_ADDRESS);
+      logs[0].args._to.should.be.equal(owner1);
+      const resultToken = logs[0].args._tokenId
+      resultToken.should.be.bignumber.equal(t16);
+      const is16 = await this.qk.isZoom(resultToken.toString(), 16);
+      is16.should.be.true
+      const quadKeyResult = new BinaryQuadkey.fromUInt64(Long.fromString(resultToken.toString()))
+      quadKeyResult.toQuadkey().should.be.equal("0123012301230123")
+    })
   })
 
   it('should support ERC-721', async function _() {
@@ -105,43 +137,66 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient]) => {
     await this.token.uniqueTokenGroupId(duplicate).should.be.rejectedWith(EVMRevert)
   })
 
-  // TODO Batchable721Token testing
-  // describe('Batching', () => {
-  //   const numTokens = 48
+  
+String.prototype.replaceAt=function(index, replacement) {
+  return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
+}
 
-  //   it(`should be able to transfer at least ${numTokens}`, async function _() {
-  //     const tokens = Array(numTokens).fill().map((x, i) => i)
-  //     await this.token.publicMinting(owner1, [tile2])
-  //     await this.token.approveMany(owner2, tokens, { from: owner1 }).should.be.fulfilled
-  //     await this.token.transferFromMany(owner1, recipient, tokens, { from: owner2 }).should.be.fulfilled
-  //     const balance = await this.token.balanceOf(recipient)
-  //     balance.should.be.bignumber.equal(numTokens)
-  //   })
+const generateQuadKeys = (num, lastKey, keys) => {
+  if (num == 0) {
+    return keys
+  }
+  let newKey = lastKey
+  for (let i = 1; i<=16; i++) {
+    let last = Number(newKey.substr(-i, 1))
+    if (last == 3 ) {
+      newKey = newKey.replaceAt(16-i, "0")
+    } else {
+      newKey = newKey.replaceAt(16-i, String(last + 1))
+      keys.push(newKey)
+      return generateQuadKeys(num - 1, newKey, keys)
+    }
+  }
+}
+
+  // TODO Move to Batchable721Token testing
+  describe('Batching', () => {
+    const numTokens = 50
+
+    it(`should be able to transfer at least ${numTokens}`, async function _() {
+      let quadKeys = generateQuadKeys(numTokens, "0123012301230123", [])
+      const tokens = quadKeys.map(i => (new BinaryQuadkey.fromQuadkey(i)).toString())
+      await this.token.publicMinting(owner1, tokens).should.be.fulfilled
+      await this.token.approveMany(owner2, tokens, { from: owner1 }).should.be.fulfilled
+      await this.token.transferFromMany(owner1, recipient, tokens, { from: owner2 }).should.be.fulfilled
+      const balance = await this.token.balanceOf(recipient)
+      balance.should.be.bignumber.equal(numTokens)
+    })
 
 
-  //   const mintableMax = 52
+    const mintableMax = 52
 
-  //   it(`should be able to mint at least ${mintableMax}`, async function _() {
-  //     const tokens = Array(mintableMax).fill().map((x, i) => i)
-  //     const tx = await this.token.mint(owner1, tokens, { from: owner0 })
-  //   })
+    it(`should be able to mint at least ${mintableMax}`, async function _() {
+      const tokens = Array(mintableMax).fill().map((x, i) => i)
+      const tx = await this.token.mint(owner1, tokens, { from: owner0 }).should.be.fulfilled
+    })
 
-  //   it('should be able to cheaply iterate thousands of tokens', async function () {
-  //     this.timeout(0)
-  //     // Tested as high as 300
-  //     // let numGroups = 300
-  //     const numGroups = 10
-  //     for (let j = 0; j < numGroups; j++) {
-  //       const tokens = Array(mintableMax).fill().map((x, i) => i + (j * mintableMax))
-  //       const tx = await this.token.mint(owner1, tokens, { from: owner0, gasPrice: 0 })
-  //     }
-  //     const balance = await this.token.balanceOf(owner1)
-  //     assert.equal(balance, numGroups * mintableMax)
+    it('should be able to cheaply iterate thousands of tokens', async function () {
+      this.timeout(0)
+      // Tested as high as 300
+      // let numGroups = 300
+      const numGroups = 10
+      for (let j = 0; j < numGroups; j++) {
+        const tokens = Array(mintableMax).fill().map((x, i) => i + (j * mintableMax))
+        const tx = await this.token.mint(owner1, tokens, { from: owner0, gasPrice: 0 }).should.be.fulfilled
+      }
+      const balance = await this.token.balanceOf(owner1)
+      assert.equal(balance, numGroups * mintableMax)
 
-  //     for (let k = 100; k < 200; k++) {
-  //       await this.token.tokenOfOwnerByIndex(owner1, k).should.be.fulfilled
-  //     }
-  //   })
-  // })
+      for (let k = 100; k < 200; k++) {
+        await this.token.tokenOfOwnerByIndex(owner1, k).should.be.fulfilled
+      }
+    })
+  })
 })
 

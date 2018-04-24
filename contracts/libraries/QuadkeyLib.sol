@@ -31,7 +31,7 @@ library QuadkeyLib {
     }
 
     /*
-        Will validate a given quadkey has valid zoom and the bits for that zoom are valid
+        Will validate a given quadkey has valid zoom
         @param _quadKey - quadkey to check
     */
     function isValidQuadkey(
@@ -42,17 +42,7 @@ library QuadkeyLib {
         returns (bool) 
     {
         uint64 zoom = (_quadKey & ZOOM_MASK);
-        if (zoom <= MAX_ZOOM) {
-            for (uint64 i = 0; i < zoom; i++) {
-                uint64 location = 64 - i * 2;
-                bytes1 char_code = bytes1(_quadKey & (0x3 << location) >> location);
-                if (char_code > 3) {
-                    return false;
-                }
-                return true;
-            }
-        }
-        return false;
+        return (zoom <= MAX_ZOOM);
     }
 
     /*
