@@ -32,6 +32,7 @@
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
     "lodash": "^4.17.5",
+    "solc": "^0.4.23",
     "truffle-contract": "^3.0.4",
     "zeppelin-solidity": "^1.8.0"
   }

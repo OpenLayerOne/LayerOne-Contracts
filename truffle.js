@@ -3,12 +3,11 @@ require('babel-register')({
 });
 require('babel-polyfill');
 module.exports = {
+  migrations_directory: "./migrations",
   networks: {
     development: {
-      host: "127.0.0.1",
-      port: 7545,
-      gas: 6721975,
-      gasPrice: 4200000,
+      host: "localhost",
+      port: 8545,
       network_id: "*" // Match any network id
     },
     kovan: {
@@ -24,7 +23,7 @@ module.exports = {
   solc: {
     optimizer: {
       enabled: true,
-      runs: 200
+      runs: 500
     }
   }
 };

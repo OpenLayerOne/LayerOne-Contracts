@@ -30,7 +30,7 @@ const makeQuadKey = function (token) {
   return new BinaryQuadkey.fromQuadkey(token).toString()
 }
 
-async function deployLandSale(deployer, landSaleOwner) {
+function deployLandSale(deployer, landSaleOwner) {
   const cap = ether(10000)
   const startTime = latestTime() + duration.seconds(1)
   const endTime = startTime + duration.days(16)
@@ -48,32 +48,34 @@ async function deployLandSale(deployer, landSaleOwner) {
     endPrice,
     landSaleOwner,
     land,
-    { from: landSaleOwner }).then(crowdsale => {
-      return QuadToken.deployed()
-    }).then(token => {
-      return token.setApprovedMinter(Capped721DutchCrowdsale.address, true, {from: landSaleOwner})
-    })
+    { from: landSaleOwner })
 }
 
 
-async function deployPromoUtility(deployer, landSaleOwner) {
+function deployPromoUtility(deployer, landSaleOwner) {
   const address = QuadToken.address
   return deployer.deploy(PromoMintingUtility, address, { from: landSaleOwner })
 }
 
 
-async function deployLibraries(deployer) {
-  return deployer.deploy([Quadkey, DutchAuction]).then(async () => {
+function deployLibraries(deployer) {
+  return deployer.deploy([Quadkey, DutchAuction]).then(() => {
     return deployer.link(Quadkey, [QuadToken, Capped721DutchCrowdsale])
   }).then(() => {
     return deployer.link(DutchAuction, [Capped721DutchCrowdsale])
   })
 }
 
-module.exports = async function _(deployer, network, [owner]) {
-  return deployLibraries(deployer).then(async () => {
+module.exports = function _(deployer, network, [owner]) {
+  return deployLibraries(deployer).then(() => {
     return deployer.deploy(QuadToken, { from: owner })
   }).then(() => {
+    console.log(" HERE")
     return deployLandSale(deployer, owner)
-  }).catch(console.log)
+  }).then(() => {
+    return QuadToken.deployed()
+  }).then(token => {
+    return token.setApprovedMinter(Capped721DutchCrowdsale.address, true, {from: owner})
+  })
+  .catch(console.log)
 }

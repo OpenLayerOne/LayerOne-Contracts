@@ -2,7 +2,7 @@ import assertRevert from 'zeppelin-solidity/test/helpers/assertRevert'
 import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert'
 import { advanceBlock } from 'zeppelin-solidity/test/helpers/advanceToBlock'
 import Long from 'long'
-
+import generateQuadKeys from 'generateQuadKeys'
 const QuadToken = artifacts.require('QuadToken.sol')
 const BigNumber = web3.BigNumber
 const BinaryQuadkey = require('binaryquadkey')
@@ -137,28 +137,6 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient]) => {
     await this.token.uniqueTokenGroupId(duplicate).should.be.rejectedWith(EVMRevert)
   })
 
-  
-String.prototype.replaceAt=function(index, replacement) {
-  return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
-}
-
-const generateQuadKeys = (num, lastKey, keys) => {
-  if (num == 0) {
-    return keys
-  }
-  let newKey = lastKey
-  for (let i = 1; i<=16; i++) {
-    let last = Number(newKey.substr(-i, 1))
-    if (last == 3 ) {
-      newKey = newKey.replaceAt(16-i, "0")
-    } else {
-      newKey = newKey.replaceAt(16-i, String(last + 1))
-      keys.push(newKey)
-      return generateQuadKeys(num - 1, newKey, keys)
-    }
-  }
-}
-
   // TODO Move to Batchable721Token testing
   describe('Batching', () => {
     const numTokens = 50
@@ -172,7 +150,6 @@ const generateQuadKeys = (num, lastKey, keys) => {
       const balance = await this.token.balanceOf(recipient)
       balance.should.be.bignumber.equal(numTokens)
     })
-
 
     const mintableMax = 52
 
