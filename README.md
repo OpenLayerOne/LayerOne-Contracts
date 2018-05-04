@@ -24,7 +24,7 @@ This public, open source repository contains the following:
 A uint64 quadkey, '03120312', looks like 
 
 desc| quadkey | undefined | zoom level
---- | --- | --- | --- | ---
+--- | --- | --- | --- 
 bitmask | 0-n | n-57 | 58-63
 bits | 0b0011011000110110 | 0000000000000000000000000000000000000000000 | 01000
 data | quadkey '03120312' | undefined | zoom level 8
@@ -38,7 +38,7 @@ For version 1.0, we will use existing off-chain binary quadkey libraries, in add
 Here's the standard quadkey bit format:
 
 Size | uint64 | uint64 | uint128
---- | --- | --- | --- | ---
+--- | --- | --- | --- 
 bitmask | 0-63 | 64-127 | 128-255
 contents | Binary Quadkey | Unix 64-bit Timestamp | Extra Space
 
