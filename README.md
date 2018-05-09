@@ -48,10 +48,13 @@ By storing time (and potentially altitude) seperate from the quad-space address 
 A more scalable solution to incorporate 3D space and time would be to simply bitpack the remaining 196 bits with the another level of precision, altitude and time using bitpacking in a single 256bit integer.  So, the first 64 bits for the high level binary quadkey.  Then a second 64bits as a subdivision of the first binary quadkey making the 2d precision get down to the nanometer scale.  Then, the third 64 bits would be reserved for altitude, and the fourth for a 64bit unix time.
 
 Here's the format of this proposal:
+
 Size | uint64 | uint64 | uint64 | uint64
 --- | --- | --- | --- | ---
 bitmask | 0-63 | 64-127 | 128-195 | 196-255
 contents | Binary Quadkey | 2nd Sub-Binary Quadkey | Altitude | Time
+
+One great advantage of this proposal is its backward compatability with v1.0
 
 
 ## Quad Space Time Protocol v2.1 (QST2)
