@@ -32,17 +32,15 @@ data | quadkey '03120312' | undefined | zoom level 8
 
 # Protocols
 
-## Quad Space Time Protocol v1 (QST1)
-For version 1.0, we will use existing off-chain binary quadkey libraries, in addition to the QuadKeylib we are building to efficiently store as DB keys.  In this proof of concept protocol, the uint64 binary quadkey fits well within the bounds of a single uint256.
+## Quad Space Time Protocol v1
+This version 1.0 is what we will release with LayerOne's go-to-market crypto learning game, LandRush. We will use existing off-chain binary quadkey libraries, in addition to the QuadKeylib we are building to efficiently store as DB keys.  In this proof of concept protocol, the uint64 binary quadkey fits well within the bounds of a single uint256.
 
 Here's the standard quadkey bit format:
 
-Size | uint64 | uint64 | uint128
---- | --- | --- | --- 
-bitmask | 0-63 | 64-127 | 128-255
-contents | Binary Quadkey | Unix 64-bit Timestamp | Extra Space
-
-By storing time (and potentially altitude) seperate from the quad-space address we limit precision of the quadkey to uint64 space (29 zoom levels of precision).  Things get much more precise if we expand to a uint256 space:
+Size | uint64 | uint196
+--- | --- | ---
+bitmask | 0-63 | 64-255
+contents | Binary Quadkey | Extra Space
 
 ## Quad Space Bit-packed Protocol v2.0
 A more scalable solution to incorporate 3D space and time would be to simply bitpack the remaining 196 bits with the another level of precision, altitude and time using bitpacking in a single 256bit integer.  So, the first 64 bits for the high level binary quadkey.  Then a second 64bits as a subdivision of the first binary quadkey making the 2d precision get down to the nanometer scale.  Then, the third 64 bits would be reserved for altitude, and the fourth for a 64bit unix time.
