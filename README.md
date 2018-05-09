@@ -44,7 +44,17 @@ contents | Binary Quadkey | Unix 64-bit Timestamp | Extra Space
 
 By storing time (and potentially altitude) seperate from the quad-space address we limit precision of the quadkey to uint64 space (29 zoom levels of precision).  Things get much more precise if we expand to a uint256 space:
 
-## Quad Space Time Protocol v2 (QST2)
+## Quad Space Bit-packed Protocol v2.0
+A more scalable solution to incorporate 3D space and time would be to simply bitpack the remaining 196 bits with the another level of precision, altitude and time using bitpacking in a single 256bit integer.  So, the first 64 bits for the high level binary quadkey.  Then a second 64bits as a subdivision of the first binary quadkey making the 2d precision get down to the nanometer scale.  Then, the third 64 bits would be reserved for altitude, and the fourth for a 64bit unix time.
+
+Here's the format of this proposal:
+Size | uint64 | uint64 | uint64 | uint64
+--- | --- | --- | --- | ---
+bitmask | 0-63 | 64-127 | 128-195 | 196-255
+contents | Binary Quadkey | 2nd Sub-Binary Quadkey | Altitude | Time
+
+
+## Quad Space Time Protocol v2.1 (QST2)
 What is really interesting and will effectively future proof the Quad Space Time Protocol is a new concept of a four dimensional quad key.  To make this truly increadible advancement in geo-space-time indexing, we would like to get community feedback from the ground floor.
 
 In a single unsigned 256 bit integer one could isolate geo-spacial-temporal identifiers that can be translated to lat, lng, altitude (meters), and time (seconds), to extremely high levels of precision.  On the order of nano-meters and nano-seconds. All this is deserving of a white paper, which will be underway shortly.
