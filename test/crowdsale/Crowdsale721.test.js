@@ -1,8 +1,8 @@
-import ether from 'zeppelin-solidity/test/helpers/ether'
-import { advanceBlock } from 'zeppelin-solidity/test/helpers/advanceToBlock'
-import { increaseTimeTo, duration } from 'zeppelin-solidity/test/helpers/increaseTime'
-import latestTime from 'zeppelin-solidity/test/helpers/latestTime'
-import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert'
+import ether from 'openzeppelin-solidity/test/helpers/ether'
+import { advanceBlock } from 'openzeppelin-solidity/test/helpers/advanceToBlock'
+import { increaseTimeTo, duration } from 'openzeppelin-solidity/test/helpers/increaseTime'
+import latestTime from 'openzeppelin-solidity/test/helpers/latestTime'
+import EVMRevert from 'openzeppelin-solidity/test/helpers/EVMRevert'
 
 const BigNumber = web3.BigNumber
 const BinaryQuadkey = require('binaryquadkey')

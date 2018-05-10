@@ -1,5 +1,5 @@
-import assertRevert from 'zeppelin-solidity/test/helpers/assertRevert';
-import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert';
+import assertRevert from 'openzeppelin-solidity/test/helpers/assertRevert';
+import EVMRevert from 'openzeppelin-solidity/test/helpers/EVMRevert';
 
 var Quadkey = artifacts.require('libraries/QuadkeyLib.sol');
 const BigNumber = web3.BigNumber;

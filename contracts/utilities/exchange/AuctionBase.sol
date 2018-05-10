@@ -1,6 +1,6 @@
 pragma solidity >=0.4.18;
 
-// import 'zeppelin-solidity/contracts/lifecycle/Pausable.sol';
+// import 'openzeppelin-solidity/contracts/lifecycle/Pausable.sol';
 
 /* @title Auction Core
     @dev Contains models, variables, and internal methods for the auction.
@@ -31,7 +31,7 @@ contract AuctionBase {
         uint64 createdAt;
         
         // list of token ids in auction
-        uint64[] tokenIds;
+        uint256[] tokenIds;
     }
 
     // Map from auction ID to their corresponding auction.
@@ -40,13 +40,13 @@ contract AuctionBase {
 
     event AuctionSuccessful(uint256 parcelId, uint256 totalPrice, address winner);
     event AuctionCancelled(uint256 parcelId);
-    event AuctionCreated(uint256 parcelId, uint256 startingPrice, uint64 duration, uint64 createdAt, uint64[] tokenIds);
+    event AuctionCreated(uint256 parcelId, uint256 startingPrice, uint64 duration, uint64 createdAt, uint256[] tokenIds);
 
     /// @dev Cancels an auction unconditionally.
     function _cancelAuction(uint256 _parcelId) internal {
         _removeAuction(_parcelId);
         // todo, transferring of funds, etc
-        AuctionCancelled(_parcelId);
+        emit AuctionCancelled(_parcelId);
     }
 
     /// @dev Removes an auction from the list of open auctions.

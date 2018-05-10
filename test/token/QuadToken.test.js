@@ -1,6 +1,6 @@
-import assertRevert from 'zeppelin-solidity/test/helpers/assertRevert'
-import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert'
-import { advanceBlock } from 'zeppelin-solidity/test/helpers/advanceToBlock'
+import assertRevert from 'openzeppelin-solidity/test/helpers/assertRevert'
+import EVMRevert from 'openzeppelin-solidity/test/helpers/EVMRevert'
+import { advanceBlock } from 'openzeppelin-solidity/test/helpers/advanceToBlock'
 import Long from 'long'
 import generateQuadKeys from 'generateQuadKeys'
 const QuadToken = artifacts.require('QuadToken.sol')

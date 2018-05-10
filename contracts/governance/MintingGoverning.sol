@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 import "./BatchSizeGoverning.sol";
 
 contract MintingGoverning is BatchSizeGoverning {

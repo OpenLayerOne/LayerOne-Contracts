@@ -1,6 +1,6 @@
 pragma solidity >=0.4.18;
 
-import "zeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 
 contract BatchSizeGoverning is Pausable {
     uint8 public batchSize = 64;
@@ -17,10 +17,10 @@ contract BatchSizeGoverning is Pausable {
 
     /*
         @dev Validates the length of list is not over block limit estimation 
-        @param _ids - uint64 to check.
+        @param _ids - uint256 to check.
     */
     modifier limitBatchSize(
-        uint64[] _ids
+        uint256[] _ids
     ) {
         require(_ids.length <= batchSize);
         _;

@@ -27,11 +27,11 @@ contract SellLandUtility is LandContractUtility {
         uint64 startedAt;
         
         // list of token ids in land sale
-        uint64[] tokenIds;
+        uint256[] tokenIds;
     }
 
     event SaleSuccessful(uint256 parcelId, uint256 salePrice, address seller, address buyer);
-    event SaleCreated(uint256 parcelId, uint256 salePrice, uint64 startedAt, uint64 duration, uint64[] tokenIds, address seller, address buyer);
+    event SaleCreated(uint256 parcelId, uint256 salePrice, uint64 startedAt, uint64 duration, uint256[] tokenIds, address seller, address buyer);
     event SaleCancelled(uint256 parcelId, address seller);
 
     mapping (uint256 => LandSale) _parcelIdToSale;
@@ -56,7 +56,7 @@ contract SellLandUtility is LandContractUtility {
         @param _duration Optional - How long to keep the item listed
     */
     function placeForSale(
-        uint64[] _tokenIds,
+        uint256[] _tokenIds,
         uint256 _price,
         address _buyer,
         uint64 _duration
@@ -83,7 +83,7 @@ contract SellLandUtility is LandContractUtility {
 
         _parcelIdToSale[parcelId] = sale;
 
-        SaleCreated(
+        emit SaleCreated(
             parcelId,
             _price,
             sale.startedAt,
@@ -103,7 +103,7 @@ contract SellLandUtility is LandContractUtility {
         @param _tokenIds - tile tokens.
     */
     function payForParcel(
-        uint64[] _tokenIds
+        uint256[] _tokenIds
     ) 
         whenNotPaused
         limitBatchSize(_tokenIds)
@@ -126,7 +126,7 @@ contract SellLandUtility is LandContractUtility {
         uint256 fee = payment/_listingFee;
         require(sale.seller.send(payment - fee));
 
-        SaleSuccessful(_parcelId, sale.salePrice, sale.seller, msg.sender);
+        emit SaleSuccessful(_parcelId, sale.salePrice, sale.seller, msg.sender);
         // Don't clear until event emitted
         _clearForSale(_parcelId);
     }
@@ -149,7 +149,7 @@ contract SellLandUtility is LandContractUtility {
         @param _tokenIds - tile tokens.
     */
     function cancelForSale(
-        uint64[] _tokenIds
+        uint256[] _tokenIds
     ) 
         limitBatchSize(_tokenIds)
         whenNotPaused
@@ -159,6 +159,6 @@ contract SellLandUtility is LandContractUtility {
         uint parcelId = landContract.uniqueTokenGroupId(_tokenIds);
 
         _clearForSale(parcelId);
-        SaleCancelled(parcelId, msg.sender);
+        emit SaleCancelled(parcelId, msg.sender);
     }
 }

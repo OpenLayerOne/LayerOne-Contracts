@@ -2,7 +2,7 @@ pragma solidity ^0.4.19;
 
 /* 
     @dev This library helps you deal with quadkeys on the blockchain
-    allows you to create, verify, and work with quadkeys up to storage in uint64
+    allows you to create, verify, and work with quadkeys up to storage in uint256
     @author LayerOne
 */
 library QuadkeyLib {
@@ -18,15 +18,15 @@ library QuadkeyLib {
         @param _n the zoom level to generate mask for
     */
     function createZoomMask(
-        uint64 _n
+        uint256 _n
     )         
         public 
         pure  
-        returns (uint64) 
+        returns (uint256) 
     {
         require(_n <= MAX_ZOOM);
-        uint64 numShifts = 64 - (_n*2);
-        uint64 shifted = 0xffffffffffffffff * uint64(2) ** numShifts;
+        uint256 numShifts = 64 - (_n*2);
+        uint256 shifted = 0xffffffffffffffff * uint256(2) ** numShifts;
         return shifted;
     }
 
@@ -35,24 +35,24 @@ library QuadkeyLib {
         @param _quadKey - quadkey to check
     */
     function isValidQuadkey(
-        uint64 _quadKey
+        uint256 _quadKey
     ) 
         public 
         pure 
         returns (bool) 
     {
-        uint64 zoom = (_quadKey & ZOOM_MASK);
+        uint256 zoom = (_quadKey & ZOOM_MASK);
         return (zoom <= MAX_ZOOM);
     }
 
     /*
         Checks if the given quadkey has the given zoom
-        @param _n the quadkey (uint64)
+        @param _n the quadkey (uint256)
         @param _zoom the zoom level
     */
     function isZoom(
-        uint64 _quadKey,
-        uint64 _zoom
+        uint256 _quadKey,
+        uint256 _zoom
     )         
         public 
         pure
@@ -67,15 +67,15 @@ library QuadkeyLib {
         @param _parentId the parent id to test
     */
     function isChildWithinParent(
-        uint64 _childId, 
-        uint64 _parentId
+        uint256 _childId, 
+        uint256 _parentId
     ) 
         public 
         pure
         returns (bool) 
     {
-        uint64 parentZoom = _parentId & ZOOM_MASK;
-        uint64 mask = createZoomMask(parentZoom);
+        uint256 parentZoom = _parentId & ZOOM_MASK;
+        uint256 mask = createZoomMask(parentZoom);
         return ((_childId & mask) == (_parentId & mask));
     }
 
@@ -85,8 +85,8 @@ library QuadkeyLib {
         @param _parentId the id of the parent to check
     */
     function areChildrenWithinParent(
-            uint64[] _tokenIds,                        
-            uint64 _parentId
+            uint256[] _tokenIds,                        
+            uint256 _parentId
     )
         public
         pure 

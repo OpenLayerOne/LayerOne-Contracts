@@ -1,7 +1,7 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 import "../governance/MintingGoverning.sol";
-import "zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
 
 contract Batchable721Token is ERC721Token, MintingGoverning {
 
@@ -12,7 +12,7 @@ contract Batchable721Token is ERC721Token, MintingGoverning {
   */
   function mint(
       address _beneficiary,
-      uint64[] _tokenIds
+      uint256[] _tokenIds
   )
     approvedMinter
     whenNotPaused
@@ -32,7 +32,7 @@ contract Batchable721Token is ERC721Token, MintingGoverning {
   */
   function burn(
       address _owner,
-      uint64[] _tokenIds
+      uint256[] _tokenIds
   )
     approvedMinter
     whenNotPaused
@@ -50,7 +50,7 @@ contract Batchable721Token is ERC721Token, MintingGoverning {
    @param _tokenIds the list of tokenIds in group
   */
   function uniqueTokenGroupId (
-    uint64[] memory _tokenIds
+    uint256[] memory _tokenIds
   ) 
     public 
     pure 
@@ -76,7 +76,7 @@ contract Batchable721Token is ERC721Token, MintingGoverning {
   function transferFromMany(
     address _from,
     address _to, 
-    uint64[] _tokenIds
+    uint256[] _tokenIds
   ) 
     limitBatchSize(_tokenIds)
     whenNotPaused 
@@ -96,7 +96,7 @@ contract Batchable721Token is ERC721Token, MintingGoverning {
   */
   function approveMany(
     address _to,
-    uint64[] _tokenIds
+    uint256[] _tokenIds
   ) 
     limitBatchSize(_tokenIds)
     whenNotPaused 
@@ -114,7 +114,7 @@ contract Batchable721Token is ERC721Token, MintingGoverning {
   */
   function ownsTokens(
     address _owner, 
-    uint64[] _tokenIds
+    uint256[] _tokenIds
   ) 
     public 
     constant 

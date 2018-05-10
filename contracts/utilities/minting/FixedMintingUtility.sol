@@ -25,7 +25,7 @@ contract FixedMintingUtility is LandContractUtility {
         @param _beneficiary - Who receives the land 
      */
     function fixedPricePurchase(
-        uint64[] _tokenIds,
+        uint256[] _tokenIds,
         address _beneficiary
     )
         external

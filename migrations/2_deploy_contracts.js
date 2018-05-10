@@ -1,4 +1,4 @@
-const Capped721DutchCrowdsale = artifacts.require('Capped721DutchCrowdsale.sol')
+const LandRushCrowdsale = artifacts.require('LandRushCrowdsale.sol')
 const QuadToken = artifacts.require('QuadToken.sol')
 const PromoMintingUtility = artifacts.require('PromoMintingUtility.sol')
 const BinaryQuadkey = require('binaryquadkey')
@@ -31,17 +31,15 @@ const makeQuadKey = function (token) {
 }
 
 function deployLandSale(deployer, landSaleOwner) {
-  const cap = ether(10000)
   const startTime = latestTime() + duration.seconds(1)
-  const endTime = startTime + duration.days(16)
-  const startPrice = ether(1)
-  const endPrice = ether(0)
+  const endTime = startTime + duration.days(21)
+  const startPrice = ether(.5)
+  const endPrice = ether(0.001)
   const minTilesSold = 100000
   const land = QuadToken.address
   return deployer.deploy(
-    Capped721DutchCrowdsale,
+    LandRushCrowdsale,
     minTilesSold,
-    cap,
     startTime,
     endTime,
     startPrice,
@@ -60,9 +58,9 @@ function deployPromoUtility(deployer, landSaleOwner) {
 
 function deployLibraries(deployer) {
   return deployer.deploy([Quadkey, DutchAuction]).then(() => {
-    return deployer.link(Quadkey, [QuadToken, Capped721DutchCrowdsale])
+    return deployer.link(Quadkey, [QuadToken, LandRushCrowdsale])
   }).then(() => {
-    return deployer.link(DutchAuction, [Capped721DutchCrowdsale])
+    return deployer.link(DutchAuction, [LandRushCrowdsale])
   })
 }
 
@@ -75,7 +73,7 @@ module.exports = function _(deployer, network, [owner]) {
   }).then(() => {
     return QuadToken.deployed()
   }).then(token => {
-    return token.setApprovedMinter(Capped721DutchCrowdsale.address, true, {from: owner})
+    return token.setApprovedMinter(LandRushCrowdsale.address, true, {from: owner})
   })
   .catch(console.log)
 }
