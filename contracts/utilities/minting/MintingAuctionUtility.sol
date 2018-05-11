@@ -9,7 +9,7 @@ contract MintingAuctionUtility is EnglishAuction {
         @param _tokenIds - tile tokens.
      */
     function redeemTerraformAuction(
-        uint64[] _tokenIds
+        uint256[] _tokenIds
     )
         external
         whenNotPaused
@@ -27,7 +27,7 @@ contract MintingAuctionUtility is EnglishAuction {
         @param _buyItNowPrice - Price user could buy it now at if set
      */
     function createTerraformAuction(
-        uint64[] _tokenIds,
+        uint256[] _tokenIds,
         uint256 _startingPrice,
         uint256 _duration,   
         uint256 _buyItNowPrice

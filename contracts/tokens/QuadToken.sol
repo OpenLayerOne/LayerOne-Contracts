@@ -1,7 +1,7 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 import "./Batchable721Token.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../libraries/QuadkeyLib.sol";
 
 contract QuadToken is Batchable721Token {
@@ -9,9 +9,9 @@ contract QuadToken is Batchable721Token {
 
   // Contracts or people that own data protocols on the 
   mapping(uint256 => address) internal protocolOwners;
-  mapping (uint64 => mapping (uint256 => string)) internal protocolTokenMetadata;
+  mapping (uint256 => mapping (uint256 => string)) internal protocolTokenMetadata;
 
-  event MetadataUpdated(uint256 indexed protocol, uint64 indexed tokenId, address indexed owner);
+  event MetadataUpdated(uint256 indexed protocol, uint256 indexed tokenId, address indexed owner, string metadata);
 
   function QuadToken() 
     public 
@@ -26,7 +26,7 @@ contract QuadToken is Batchable721Token {
   */
   function publicMinting(
       address _beneficiary,
-      uint64[] _tokenIds
+      uint256[] _tokenIds
   )
     limitBatchSize(_tokenIds)
     whenNotPaused
@@ -47,7 +47,7 @@ contract QuadToken is Batchable721Token {
   */
   function updateManyTokenMetadata(
       uint256 _protocol,
-      uint64[] _tokenIds,
+      uint256[] _tokenIds,
       string _metadata
   ) 
       limitBatchSize(_tokenIds) 
@@ -83,7 +83,7 @@ contract QuadToken is Batchable721Token {
   */
   function updateTokenMetadata(
     uint256 _protocol,
-    uint64 _tokenId, 
+    uint256 _tokenId, 
     string _metadata
   ) 
     whenNotPaused
@@ -94,7 +94,7 @@ contract QuadToken is Batchable721Token {
     bool isProtocolOwner = msg.sender == protocolOwners[_protocol];
     require(isOwner || isProtocolOwner);
     protocolTokenMetadata[_tokenId][_protocol] = _metadata;
-    emit MetadataUpdated(_protocol, _tokenId, msg.sender);
+    emit MetadataUpdated(_protocol, _tokenId, msg.sender, _metadata);
   }
 
   /*
@@ -104,7 +104,7 @@ contract QuadToken is Batchable721Token {
   */
   function getTokenMetadata(    
     uint256 _protocol,
-    uint64 _tokenId
+    uint256 _tokenId
   ) 
     public
     view

@@ -1,13 +1,13 @@
-import assertRevert from 'zeppelin-solidity/test/helpers/assertRevert'
-import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert'
-import ether from 'zeppelin-solidity/test/helpers/ether'
-import latestTime from 'zeppelin-solidity/test/helpers/latestTime'
-import { increaseTimeTo, duration } from 'zeppelin-solidity/test/helpers/increaseTime'
-import { advanceBlock } from 'zeppelin-solidity/test/helpers/advanceToBlock'
+import assertRevert from 'openzeppelin-solidity/test/helpers/assertRevert'
+import EVMRevert from 'openzeppelin-solidity/test/helpers/EVMRevert'
+import ether from 'openzeppelin-solidity/test/helpers/ether'
+import latestTime from 'openzeppelin-solidity/test/helpers/latestTime'
+import { increaseTimeTo, duration } from 'openzeppelin-solidity/test/helpers/increaseTime'
+import { advanceBlock } from 'openzeppelin-solidity/test/helpers/advanceToBlock'
 
 const BinaryQuadkey = require('binaryquadkey')
 
-const Capped721DutchCrowdsale = artifacts.require('Capped721DutchCrowdsale.sol')
+const LandRushCrowdsale = artifacts.require('LandRushCrowdsale.sol')
 const QuadToken = artifacts.require('QuadToken.sol')
 const BigNumber = web3.BigNumber
 
@@ -16,7 +16,7 @@ const should = require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-contract('Capped721DutchCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWallet, tokenOwner, presaleUser1, presaleUser2, presaleUser3]) => {
+contract('LandRushCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWallet, tokenOwner, presaleUser1, presaleUser2, presaleUser3]) => {
   const cap = ether(3)
   const lessThanCap = ether(2)
 
@@ -44,7 +44,7 @@ contract('Capped721DutchCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWall
     this.startPrice = ether(1)
     this.endPrice = ether(0)
     this.tilesToSell = 5
-    this.crowdsale = await Capped721DutchCrowdsale.new(
+    this.crowdsale = await LandRushCrowdsale.new(
       this.tilesToSell,
       cap,
       this.startTime,

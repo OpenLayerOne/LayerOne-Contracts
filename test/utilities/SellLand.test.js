@@ -1,5 +1,5 @@
-import EVMRevert from 'zeppelin-solidity/test/helpers/EVMRevert';
-import ether from 'zeppelin-solidity/test/helpers/ether';
+import EVMRevert from 'openzeppelin-solidity/test/helpers/EVMRevert';
+import ether from 'openzeppelin-solidity/test/helpers/ether';
 var PayableUtility = artifacts.require('mocks/PayableUtility.sol')
 var QuadToken = artifacts.require('mocks/QuadToken.sol');
 const BigNumber = web3.BigNumber;

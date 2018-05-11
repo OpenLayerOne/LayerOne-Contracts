@@ -5,7 +5,7 @@ import "../tokens/QuadToken.sol";
 // mock class using BasicToken
 contract QuadTokenMock is QuadToken {
   function QuadTokenMock(  
-      uint64[] _tokenIds,
+      uint256[] _tokenIds,
       address owner
     ) 
     public 

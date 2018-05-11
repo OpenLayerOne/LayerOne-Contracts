@@ -7,12 +7,12 @@ import "../LandContractUtility.sol";
 */
 contract PromoMintingUtility is LandContractUtility {
     using SafeMath for uint;
-    event PromoRedeemed(address purchaser, address to, uint64 tokenId);
+    event PromoRedeemed(address purchaser, address to, uint256 tokenId);
 
     uint public outstandingPromoTokens;
     uint public redeemedPromoTokens;
 
-    mapping (uint64 => uint64) private promoTokens;
+    mapping (uint64 => uint256) private promoTokens;
 
     function PromoMintingUtility(
         address _landContract
@@ -36,12 +36,12 @@ contract PromoMintingUtility is LandContractUtility {
     {   
         require(msg.sender != 0x0);
         address beneficiary = _beneficiary == 0x0 ? msg.sender : _beneficiary;
-        uint64 tokenId = promoTokens[_promoId];
+        uint256 tokenId = promoTokens[_promoId];
 
         // check this is a valid loaded promo id
         require(tokenId != 0);
         
-        uint64[] memory tokenIds = new uint64[](1);
+        uint256[] memory tokenIds = new uint256[](1);
         tokenIds[0] = tokenId;
         // This will issue a transferred event
         landContract.mint(beneficiary, tokenIds);
@@ -51,13 +51,13 @@ contract PromoMintingUtility is LandContractUtility {
         emit PromoRedeemed(msg.sender, beneficiary, tokenId);
     }
 
-    function token(uint64 _promoId) view public returns (uint64) {
+    function token(uint64 _promoId) view public returns (uint256) {
         return promoTokens[_promoId];
     }
 
     function addPromoTokens(
         uint64[] _promoIds,
-        uint64[] _tokenIds
+        uint256[] _tokenIds
     )
         public
         onlyOwner

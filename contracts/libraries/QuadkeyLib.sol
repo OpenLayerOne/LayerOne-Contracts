@@ -2,7 +2,7 @@ pragma solidity ^0.4.19;
 
 /* 
     @dev This library helps you deal with quadkeys on the blockchain
-    allows you to create, verify, and work with quadkeys up to storage in uint64
+    allows you to create, verify, and work with quadkeys up to storage in uint256
     @author LayerOne
 */
 library QuadkeyLib {
@@ -13,6 +13,51 @@ library QuadkeyLib {
     // 29 is the max zoom allowed in quadkey mapping
     uint8 constant MAX_ZOOM = 29;
 
+
+    /* 
+        Given the quadkey, will return the parent quadkey n levels zoomed out
+    */
+    function quadkeyZoomOut(uint256 _quadKey, uint8 _n) 
+        public pure
+        returns (uint256)
+    {
+        uint64 quadKey = uint64(extractNBits(_quadKey, 64, 0));
+        uint8 zoomlevel = uint8(quadKey & ZOOM_MASK);
+        uint8 newZoom = zoomlevel - _n;
+        uint256 zoomedQuadKey = extractNBits(_quadKey, newZoom*2, 64-newZoom*2);
+        return (zoomedQuadKey * uint256(2) ** (64-newZoom*2)) | newZoom;
+    }
+
+    /*
+        Lets you pack and arrange a uint256 with individual uint64s
+    */
+    function packBits(uint64 _a, uint64 _b, uint64 _c, uint64 _d) 
+        public pure
+        returns (uint256)
+    {
+        uint256 d = _d * uint256(2) ** 192;
+        uint256 c = _c * uint256(2) ** 128;
+        uint256 b = _b * uint256(2) ** 64;
+        uint256 a = _a * uint256(2) ** 0;
+        return a | b | c | d;
+    }
+
+    /*
+        Lets you extract n bits starting at any point in a uint256
+    */
+    function extractNBits(
+        uint256 bigNum, 
+        uint8 n,
+        uint8 starting
+    )
+        public pure
+        returns (uint256) 
+    {
+        uint256 leftShift = bigNum * (uint256(2) ** uint256(256-n-starting));
+        uint256 rightShift = leftShift / (uint256(2) ** uint256(256-n));
+        return rightShift;
+    }
+
     /*
         Will create mask to be used check if quadkey match zoom of a given level
         @param _n the zoom level to generate mask for
@@ -20,13 +65,12 @@ library QuadkeyLib {
     function createZoomMask(
         uint64 _n
     )         
-        public 
-        pure  
+        public pure  
         returns (uint64) 
     {
         require(_n <= MAX_ZOOM);
         uint64 numShifts = 64 - (_n*2);
-        uint64 shifted = 0xffffffffffffffff * uint64(2) ** numShifts;
+        uint64 shifted = uint64(-1) * uint64(2) ** numShifts;
         return shifted;
     }
 
@@ -35,30 +79,30 @@ library QuadkeyLib {
         @param _quadKey - quadkey to check
     */
     function isValidQuadkey(
-        uint64 _quadKey
+        uint256 _quadKey
     ) 
-        public 
-        pure 
+        public pure 
         returns (bool) 
     {
-        uint64 zoom = (_quadKey & ZOOM_MASK);
+        uint64 quadKey = uint64(extractNBits(_quadKey, 64, 0));
+        uint256 zoom = (quadKey & ZOOM_MASK);
         return (zoom <= MAX_ZOOM);
     }
 
     /*
         Checks if the given quadkey has the given zoom
-        @param _n the quadkey (uint64)
+        @param _n the quadkey (uint256)
         @param _zoom the zoom level
     */
     function isZoom(
-        uint64 _quadKey,
-        uint64 _zoom
+        uint256 _quadKey,
+        uint256 _zoom
     )         
-        public 
-        pure
+        public pure
         returns (bool) 
     {
-        return (_quadKey & ZOOM_MASK) == _zoom;
+        uint64 quadKey = uint64(extractNBits(_quadKey, 64, 0));
+        return (quadKey & ZOOM_MASK) == _zoom;
     }
 
     /*
@@ -67,16 +111,16 @@ library QuadkeyLib {
         @param _parentId the parent id to test
     */
     function isChildWithinParent(
-        uint64 _childId, 
-        uint64 _parentId
+        uint256 _childId, 
+        uint256 _parentId
     ) 
-        public 
-        pure
+        public pure
         returns (bool) 
     {
-        uint64 parentZoom = _parentId & ZOOM_MASK;
-        uint64 mask = createZoomMask(parentZoom);
-        return ((_childId & mask) == (_parentId & mask));
+        uint64 parent = uint64(extractNBits(_parentId, 64, 0));
+        uint64 child = uint64(extractNBits(_childId, 64, 0));
+        uint64 mask = createZoomMask(parent & ZOOM_MASK);
+        return ((child & mask) == (parent & mask));
     }
 
     /*
@@ -85,11 +129,10 @@ library QuadkeyLib {
         @param _parentId the id of the parent to check
     */
     function areChildrenWithinParent(
-            uint64[] _tokenIds,                        
-            uint64 _parentId
+            uint256[] _tokenIds,                        
+            uint256 _parentId
     )
-        public
-        pure 
+        public pure 
         returns (bool) 
     {
         for (uint i = 0; i < _tokenIds.length; i++) {

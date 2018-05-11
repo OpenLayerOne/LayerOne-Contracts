@@ -2,9 +2,9 @@ pragma solidity >=0.4.18;
 
 import "./AuctionBase.sol";
 import "../LandContractUtility.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-// import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
+// import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 /*
     @title English NFT Auction (like eBay auction)
@@ -36,7 +36,7 @@ contract EnglishAuction is AuctionBase, LandContractUtility {
         @param _buyItNowPrice - Price user could buy it now at if set
     */
     function createAuction(
-        uint64[] _tokenIds,
+        uint256[] _tokenIds,
         uint256 _startingPrice,
         uint256 _duration,
         uint256 _buyItNowPrice
@@ -67,7 +67,7 @@ contract EnglishAuction is AuctionBase, LandContractUtility {
      */
     function addAuction(
         address _seller, 
-        uint64[] _tokenIds, 
+        uint256[] _tokenIds, 
         uint _startingPrice,
         uint _duration,
         uint _buyItNowPrice
@@ -94,7 +94,7 @@ contract EnglishAuction is AuctionBase, LandContractUtility {
 
         _parcelIdToAuction[parcelId] = auction;
 
-        AuctionCreated(
+        emit AuctionCreated(
             uint256(parcelId),
             uint256(auction.currentPrice),
             uint64(auction.duration),
@@ -113,7 +113,7 @@ contract EnglishAuction is AuctionBase, LandContractUtility {
     ) 
         public
         constant 
-        returns(address, address, uint, uint, uint, uint, uint64[]) 
+        returns(address, address, uint, uint, uint, uint, uint256[]) 
     {
         Auction storage auction = _parcelIdToAuction[_parcelId];
         return (auction.seller, auction.highBidder, auction.currentPrice, auction.duration, auction.createdAt, auction.buyItNowPrice, auction.tokenIds);
@@ -164,7 +164,7 @@ contract EnglishAuction is AuctionBase, LandContractUtility {
         @notice the sender must be the high bidder
     */
     function completeAuction(        
-        uint64[] _tokenIds
+        uint256[] _tokenIds
     ) 
         public
     {
@@ -194,7 +194,7 @@ contract EnglishAuction is AuctionBase, LandContractUtility {
     {
         Auction storage auction = _parcelIdToAuction[_parcelId];
         // transfer token ids to winner from auction
-        uint64[] memory tokenIds = auction.tokenIds;
+        uint256[] memory tokenIds = auction.tokenIds;
         for (uint i=0; i<tokenIds.length; i++) {
             // this contract is msg.sender (and owner) so it can redeem to the high bidder on the contract
             // TODO safe transfer
@@ -220,7 +220,7 @@ contract EnglishAuction is AuctionBase, LandContractUtility {
         whenNotPaused
     {
         Auction storage auction = _parcelIdToAuction[_parcelId];
-        uint64[] memory tokenIds = auction.tokenIds;
+        uint256[] memory tokenIds = auction.tokenIds;
 
         require(auction.highBidder == 0); // cannot cancel auction that has been bid on
         bool terraformAuction = landContract.ownsTokens(0, tokenIds);

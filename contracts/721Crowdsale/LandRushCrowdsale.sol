@@ -1,21 +1,20 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 import "./Crowdsale721.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../libraries/QuadkeyLib.sol";
 import "../libraries/DutchAuctionLib.sol";
+import "../tokens/LRGToken.sol";
 
-contract Capped721DutchCrowdsale is Crowdsale721 {
+contract LandRushCrowdsale is Crowdsale721 {
 
     using SafeMath for uint256;
     
     // Number of remaining whitelisted user slots
     uint32 public minTilesSold = 100000;
+    LRGToken public goldContract_;
 
     uint256 public endPrice;
-
-    // Hard cap for the land sale
-    uint256 public cap;
 
     /*
         The crowdsale for Layer One 
@@ -26,9 +25,8 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
         @param _wallet the destination of purchase funds
         @param _nftContract The contract that holds the tile ownership information
     */
-    function Capped721DutchCrowdsale(
+    function LandRushCrowdsale(
         uint32 _minTilesSold,
-        uint256 _cap,
         uint256 _landsaleStart,
         uint256 _landsaleEnd,
         uint256 _startPrice,
@@ -39,9 +37,6 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
         Crowdsale721(_landsaleStart, _landsaleEnd, _startPrice, _wallet, _nftContract)
         public 
     {
-        require(_cap > 0);
-        
-        cap = _cap;
         minTilesSold = _minTilesSold;
         endPrice = _endPrice;
     }
@@ -49,10 +44,10 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
     // overriding Crowdsale#hasEnded to add cap logic
     // @return true if crowdsale event has ended
     function hasEnded() public view returns (bool) {
-        return (weiRaised >= cap || nftContract_.totalSupply() >= minTilesSold );
+        return nftContract_.totalSupply() >= minTilesSold;
     }
 
-    function validPurchase(uint64[] _tokenIds) 
+    function validPurchase(uint256[] _tokenIds) 
         internal 
         view 
         returns (bool) 
@@ -72,8 +67,40 @@ contract Capped721DutchCrowdsale is Crowdsale721 {
         return correctPayment && withinPeriod;
     }
 
+    function numGoldToDistribute() 
+        public
+        view
+        returns (uint64)
+    {
+        uint256 supply = nftContract_.totalSupply();
+        if (supply < 20000) {
+            return 200000;
+        } else if (supply < 40000) {
+            return 140000;
+        } else if (supply < 60000) {
+            return 90000;
+        } else if (supply < 80000) {
+            return 50000;
+        }
+        return 20000;
+    }
+
+    // low level token purchase function
+  function buyTokens(
+    uint256[] _tokenIds,
+    address _beneficiary
+  ) 
+    public 
+    payable 
+  {
+    super.buyTokens(_tokenIds, _beneficiary);
+    
+    // transfer Gold Reward to beneficiary
+    goldContract_.transfer(_beneficiary, numGoldToDistribute());
+  }
+
     // calculates dutch auction price from start of presale to now
-    function price(uint64[] _tokenIds) 
+    function price(uint256[] _tokenIds) 
         public
         view 
         returns (uint256) 

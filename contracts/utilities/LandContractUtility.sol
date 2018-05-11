@@ -46,8 +46,8 @@ contract LandContractUtility is PriceGoverning {
         onlyOwner 
         returns (bool) 
     {
-        if (this.balance > pendingSaleValue) {
-            uint value = this.balance - pendingSaleValue;
+        if (address(this).balance > pendingSaleValue) {
+            uint value = address(this).balance - pendingSaleValue;
             emit Withdraw(address(this), msg.sender, value);
             return (msg.sender.send(value));
         }    

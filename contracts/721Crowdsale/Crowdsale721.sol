@@ -1,6 +1,6 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../tokens/Batchable721Token.sol";
 
 /**
@@ -54,11 +54,11 @@ contract Crowdsale721 {
     nftContract_ = Batchable721Token(_nftContract);
   }
   
-  event LandsalePurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint8 numTokens);
+  event LandsalePurchase(address indexed purchaser, address indexed beneficiary, uint value, uint numTokens);
 
   // low level token purchase function
   function buyTokens(
-    uint64[] _tokenIds,
+    uint256[] _tokenIds,
     address _beneficiary
   ) 
     public 
@@ -72,7 +72,7 @@ contract Crowdsale721 {
     // update state
     weiRaised = weiRaised.add(weiAmount);
 
-    emit LandsalePurchase(msg.sender, _beneficiary, weiAmount, uint8(_tokenIds.length));
+    emit LandsalePurchase(msg.sender, _beneficiary, weiAmount, _tokenIds.length);
 
     forwardFunds();
 
@@ -94,7 +94,7 @@ contract Crowdsale721 {
   // @param _tokenIds - pass the tokens to price
   // @return true if the transaction can buy tokens
   // override to change the price/quantity rates
-  function validPurchase(uint64[] _tokenIds) internal view returns (bool) {
+  function validPurchase(uint256[] _tokenIds) internal view returns (bool) {
     bool withinPeriod = now >= startTime && now <= endTime;
     bool correctPayment = msg.value >= price(_tokenIds);
     return withinPeriod && correctPayment;
@@ -102,7 +102,7 @@ contract Crowdsale721 {
 
   // calculates the price for all tokens
   // override to customize the pricing for tokens being minted
-  function price(uint64[] _tokenIds) public view returns (uint256) {
+  function price(uint256[] _tokenIds) public view returns (uint256) {
     return startPrice.mul(_tokenIds.length);
   }
 }
