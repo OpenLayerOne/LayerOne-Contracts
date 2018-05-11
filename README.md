@@ -9,13 +9,14 @@ This public, open source repository contains the following:
 # Get started
 * install truffle: https://github.com/trufflesuite/truffle
 * install ganache client node for testing: http://truffleframework.com/ganache/
+* install ganache-cli: `npm install -g ganache-cli`
 ```
 %> yarn
 ```
 * Test something:
 ```
 %> truffle test test/token/QuadToken.test.js
-%> truffle test test/token/Capped721DutchCrowdsale.test.js
+%> truffle test test/token/LandRushCrowdsale.test.js
 ```
 ---
 
