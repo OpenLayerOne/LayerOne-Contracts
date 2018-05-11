@@ -2,7 +2,7 @@ import assertRevert from 'openzeppelin-solidity/test/helpers/assertRevert'
 import EVMRevert from 'openzeppelin-solidity/test/helpers/EVMRevert'
 import { advanceBlock } from 'openzeppelin-solidity/test/helpers/advanceToBlock'
 import Long from 'long'
-import generateQuadKeys from 'generateQuadKeys'
+import generateQuadKeys from './generateQuadKeys'
 const QuadToken = artifacts.require('QuadToken.sol')
 const BigNumber = web3.BigNumber
 const BinaryQuadkey = require('binaryquadkey')
