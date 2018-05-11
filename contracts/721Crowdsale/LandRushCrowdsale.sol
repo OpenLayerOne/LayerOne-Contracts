@@ -4,9 +4,10 @@ import "./Crowdsale721.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../libraries/QuadkeyLib.sol";
 import "../libraries/DutchAuctionLib.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "../tokens/LRGToken.sol";
 
-contract LandRushCrowdsale is Crowdsale721 {
+contract LandRushCrowdsale is Crowdsale721, Ownable {
 
     using SafeMath for uint256;
     
@@ -32,11 +33,13 @@ contract LandRushCrowdsale is Crowdsale721 {
         uint256 _startPrice,
         uint256 _endPrice,
         address _wallet,
-        address _nftContract
+        address _nftContract,
+        address _goldContract
     ) 
         Crowdsale721(_landsaleStart, _landsaleEnd, _startPrice, _wallet, _nftContract)
         public 
     {
+        goldContract_ = LRGToken(_goldContract);
         minTilesSold = _minTilesSold;
         endPrice = _endPrice;
     }
@@ -74,15 +77,15 @@ contract LandRushCrowdsale is Crowdsale721 {
     {
         uint256 supply = nftContract_.totalSupply();
         if (supply < 20000) {
-            return 200000;
+            return 2000;
         } else if (supply < 40000) {
-            return 140000;
+            return 1400;
         } else if (supply < 60000) {
-            return 90000;
+            return 900;
         } else if (supply < 80000) {
-            return 50000;
+            return 500;
         }
-        return 20000;
+        return 200;
     }
 
     // low level token purchase function
@@ -96,7 +99,7 @@ contract LandRushCrowdsale is Crowdsale721 {
     super.buyTokens(_tokenIds, _beneficiary);
     
     // transfer Gold Reward to beneficiary
-    goldContract_.transfer(_beneficiary, numGoldToDistribute());
+    goldContract_.transferFrom(owner, _beneficiary, _tokenIds.length.mul(numGoldToDistribute()));
   }
 
     // calculates dutch auction price from start of presale to now

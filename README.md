@@ -16,7 +16,7 @@ This public, open source repository contains the following:
 * Test something:
 ```
 %> truffle test test/token/QuadToken.test.js
-%> truffle test test/token/LandRushCrowdsale.test.js
+%> truffle test test/crowdsale/Capped721DutchCrowdsale.test.js
 ```
 ---
 

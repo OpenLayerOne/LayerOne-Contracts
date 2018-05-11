@@ -38,8 +38,7 @@ library QuadkeyLib {
         uint256 d = _d * uint256(2) ** 192;
         uint256 c = _c * uint256(2) ** 128;
         uint256 b = _b * uint256(2) ** 64;
-        uint256 a = _a * uint256(2) ** 0;
-        return a | b | c | d;
+        return uint256(_a) | b | c | d;
     }
 
     /*

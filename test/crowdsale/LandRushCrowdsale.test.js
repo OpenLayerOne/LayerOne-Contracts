@@ -9,6 +9,7 @@ const BinaryQuadkey = require('binaryquadkey')
 
 const LandRushCrowdsale = artifacts.require('LandRushCrowdsale.sol')
 const QuadToken = artifacts.require('QuadToken.sol')
+const LRGToken = artifacts.require('LRGToken.sol')
 const BigNumber = web3.BigNumber
 
 const should = require('chai')
@@ -17,8 +18,6 @@ const should = require('chai')
   .should()
 
 contract('LandRushCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWallet, tokenOwner, presaleUser1, presaleUser2, presaleUser3]) => {
-  const cap = ether(3)
-  const lessThanCap = ether(2)
 
   const t1 = (new BinaryQuadkey.fromQuadkey('0231010223123111')).toString()
   const t2 = (new BinaryQuadkey.fromQuadkey('0231010223123121')).toString()
@@ -41,22 +40,24 @@ contract('LandRushCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWallet, to
     this.endTime = this.startTime + duration.weeks(9)
     this.afterEndTime = this.endTime + duration.seconds(1)
     this.token = await QuadToken.new({ from: nftOwner, gasPrice: 0 })
-    this.startPrice = ether(1)
-    this.endPrice = ether(0)
+    this.lrgToken = await LRGToken.new({ from: nftOwner, gasPrice: 0 })
+    this.startPrice = ether(0.5)
+    this.endPrice = ether(0.001)
     this.tilesToSell = 5
     this.crowdsale = await LandRushCrowdsale.new(
       this.tilesToSell,
-      cap,
       this.startTime,
       this.endTime,
       this.startPrice,
       this.endPrice,
       crowdsaleWallet,
       this.token.address,
-      { from: crowdsaleOwner, gasPrice: 0 })
+      this.lrgToken.address,
+      { from: nftOwner, gasPrice: 0 })
       this.pricePerToken = await this.crowdsale.price([t1])
-
-    await this.token.setApprovedMinter(this.crowdsale.address, true, { from: nftOwner, gasPrice: 0 })
+      
+      await this.lrgToken.approve(this.crowdsale.address, 200000000, { from: nftOwner, gasPrice: 0 } )
+      await this.token.setApprovedMinter(this.crowdsale.address, true, { from: nftOwner, gasPrice: 0 })
   })
 
   describe('purchase validation', () => {
@@ -86,25 +87,10 @@ contract('LandRushCrowdsale', ([_, crowdsaleOwner, nftOwner, crowdsaleWallet, to
       ended.should.equal(false)
     })
 
-    it('should not be ended if under cap', async function () {
-      let hasEnded = await this.crowdsale.hasEnded()
-      hasEnded.should.equal(false)
-      await this.crowdsale.buyTokens([t1], tokenOwner, { value: this.pricePerToken }).should.be.fulfilled
-      hasEnded = await this.crowdsale.hasEnded()
-      hasEnded.should.equal(false)
-    })
-
-    it('should be ended if cap reached', async function () {
-      await this.crowdsale.buyTokens([t1, t2, t3], tokenOwner, { value: this.pricePerToken * 4 }).should.be.fulfilled
-      const hasEnded = await this.crowdsale.hasEnded()
-      hasEnded.should.equal(true)
-      await this.crowdsale.buyTokens([t4, t5], tokenOwner, { value: this.pricePerToken * 2 }).should.not.be.fulfilled
-    })
-
     it('should be ended if token limit is reached', async function () {
       await increaseTimeTo(this.afterEndTime)
-
-      await this.crowdsale.buyTokens([t1, t2, t3, t4, t5], tokenOwner, { value: 0 }).should.be.fulfilled
+      let owner = await this.crowdsale.owner()
+      await this.crowdsale.buyTokens([t1, t2, t3, t4, t5], tokenOwner, { value: this.pricePerToken * 5}).should.be.fulfilled
 
       const hasEnded = await this.crowdsale.hasEnded()
       hasEnded.should.equal(true)
