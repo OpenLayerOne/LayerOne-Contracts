@@ -29,27 +29,6 @@ contract QuadToken is Batchable721Token {
   }
 
   /*
-    @dev Allows free public minting of zoom level 16 tokens
-    @param _beneficiary - Who gets the token
-    @param _tokenIds - tile tokens.
-  */
-  function publicMinting(
-      address _beneficiary,
-      uint256[] _tokenIds
-  )
-    limitBatchSize(_tokenIds)
-    whenNotPaused
-    isMintingOn
-    public
-  {
-      for (uint i = 0; i < _tokenIds.length; i++) {
-        require(QuadkeyLib.isZoom(_tokenIds[i], 16));
-        // This will assign ownership, and also emit the Transfer event
-        _mint(_beneficiary, _tokenIds[i]); 
-      }
-  }
-
-  /*
     @dev Updates many tiles for metadata at the same time
     @param _tokenIds - tile tokens.
     @param _metadata - the string metadata associated with tile

@@ -34,7 +34,7 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient, protocolOwner, lrg
   describe('Minting', () => {
     
     beforeEach(async function _() {
-      await this.token.publicMinting(owner0, [tile1])
+      await this.token.mint(owner0, [tile1], { from: owner0})
       this.qk = await Quadkey.new();
     })
 
@@ -44,7 +44,7 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient, protocolOwner, lrg
     })
 
     it('should return correct balances after transfer', async function _() {
-      await this.token.publicMinting(owner1, [tile2])
+      await this.token.mint(owner1, [tile2], { from: owner0})
       const token = await this.token.tokenOfOwnerByIndex(owner0, 0)
       await this.token.transferFromMany(owner0, owner1, [tile1], { from: owner0 })
       const firstAccountBalance = await this.token.balanceOf(owner0)
@@ -54,24 +54,26 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient, protocolOwner, lrg
     })
 
     it('should throw an error when trying to assign existing parcel', async function _() {
-      await this.token.publicMinting(owner1, [tile1]).should.be.rejectedWith(EVMRevert)
+      await this.token.mint(owner1, [tile1], { from: owner0}).should.be.rejectedWith(EVMRevert)
     })
 
     it('should throw an error when trying to assign existing token in new parcel', async function _() {
-      await this.token.publicMinting(owner1, [tile2, tile1]).should.be.rejectedWith(EVMRevert)
+      await this.token.mint(owner1, [tile2, tile1], { from: owner0}).should.be.rejectedWith(EVMRevert)
     })
-    it('should mint valid quadkeys', async function _() {
-      //Invalid zoom level minting from public endpoint
-      const t23 = (new BinaryQuadkey.fromQuadkey("03310102023223201112221")).toString()
-      await this.token.publicMinting(owner1, [t23]).should.be.rejectedWith(EVMRevert)
+    
+    // TODO move to fixed/dynamic minting utility:
+    // it('should mint valid quadkeys', async function _() {
+    //   //Invalid zoom level minting from public endpoint
+    //   const t23 = (new BinaryQuadkey.fromQuadkey("03310102023223201112221")).toString()
+    //   await this.token.mint(owner1, [t23], { from: owner0}).should.be.rejectedWith(EVMRevert)
 
-      const t17 = (new BinaryQuadkey.fromQuadkey("03310102023223201")).toString()
-      await this.token.publicMinting(owner1, [t17]).should.be.rejectedWith(EVMRevert)
+    //   const t17 = (new BinaryQuadkey.fromQuadkey("03310102023223201")).toString()
+    //   await this.token.mint(owner1, [t17], { from: owner0}).should.be.rejectedWith(EVMRevert)
       
-      const t16 = (new BinaryQuadkey.fromQuadkey("0123012301230123")).toString()
-      await this.token.publicMinting(owner1, [t16]).should.be.fulfilled
+    //   const t16 = (new BinaryQuadkey.fromQuadkey("0123012301230123")).toString()
+    //   await this.token.mint(owner1, [t16], { from: owner0}).should.be.fulfilled
 
-    })
+    // })
 
     it('should log valid minting events', async function _() {
       const qk = new BinaryQuadkey.fromQuadkey("0123012301230123")
@@ -79,7 +81,7 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient, protocolOwner, lrg
       // console.log("FIRST", qk)
       // console.log("SECOND", qk.toString())
       // console.log("THIRD", qk.toQuadkey())
-      const tx = await this.token.publicMinting(owner1, [t16]).should.be.fulfilled
+      const tx = await this.token.mint(owner1, [t16], { from: owner0}).should.be.fulfilled
       const logs = tx.logs
       logs.length.should.be.equal(1);
       logs[0].args._from.should.be.equal(ZERO_ADDRESS);
@@ -100,7 +102,7 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient, protocolOwner, lrg
   })
 
   it('should be able to query owner of land after it is assigned', async function _() {
-    await this.token.publicMinting(owner1, [tile2])
+    await this.token.mint(owner1, [tile2], { from: owner0})
     const result = await this.token.ownerOf(tile2)
     assert.equal(owner1, result)
   })
@@ -125,7 +127,7 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient, protocolOwner, lrg
     it(`should be able to transfer at least ${numTokens}`, async function _() {
       let quadKeys = generateQuadKeys(numTokens, "0123012301230123", [])
       const tokens = quadKeys.map(i => (new BinaryQuadkey.fromQuadkey(i)).toString())
-      await this.token.publicMinting(owner1, tokens).should.be.fulfilled
+      await this.token.mint(owner1, tokens, { from: owner0}).should.be.fulfilled
       await this.token.approveMany(owner2, tokens, { from: owner1 }).should.be.fulfilled
       await this.token.transferFromMany(owner1, recipient, tokens, { from: owner2 }).should.be.fulfilled
       const balance = await this.token.balanceOf(recipient)
