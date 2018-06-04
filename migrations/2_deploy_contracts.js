@@ -69,9 +69,11 @@ function deployLibraries(deployer) {
 
 module.exports = function _(deployer, network, [owner1, owner2, owner3]) {
   let goldContract = undefined
+  let landContract = undefined
   let quadTokenOwner = owner1
-  let lrgTokenOwner = owner2
-  let landRushOwner = owner3
+  let lrgTokenOwner = owner1
+  let landRushOwner = owner1
+  let nameProtocolOwner = lrgTokenOwner
   console.log("QuadToken owner", quadTokenOwner)
   console.log("LRGToken owner", lrgTokenOwner)
   console.log("LandRushCrowdsale owner", landRushOwner)
@@ -84,12 +86,15 @@ module.exports = function _(deployer, network, [owner1, owner2, owner3]) {
     return deployLandSale(deployer, landRushOwner)
   }).then(() => {
     return QuadToken.deployed()
-  }).then(token => {
-    return token.setApprovedMinter(LandRushCrowdsale.address, true, {from: quadTokenOwner})
-  }).then(() => {
-    return LRGToken.deployed()
   }).then((contract) => {
+    landContract = contract
+    return LRGToken.deployed()
+  }).then(contract => {
     goldContract = contract
+    return landContract.setApprovedMinter(LandRushCrowdsale.address, true, {from: quadTokenOwner})
+  }).then(() => {
+    return landContract.createMetadataProtocol(1, ether(2), 0, lrgTokenOwner, nameProtocolOwner, goldContract.address)
+  }).then((contract) => {
     return goldContract.totalSupply()
   }).then(supply => {
     console.log("LRG SUPPLY", supply.toString())
