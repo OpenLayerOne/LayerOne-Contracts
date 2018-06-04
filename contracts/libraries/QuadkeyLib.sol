@@ -17,7 +17,7 @@ library QuadkeyLib {
     /* 
         Given the quadkey, will return the parent quadkey n levels zoomed out
     */
-    function quadkeyZoomOut(uint256 _quadKey, uint8 _n) 
+    function zoomOut(uint256 _quadKey, uint8 _n) 
         public pure
         returns (uint256)
     {

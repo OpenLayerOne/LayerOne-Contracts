@@ -13,7 +13,7 @@ const should = require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-contract('QuadToken', ([_, owner0, owner1, owner2, recipient]) => {
+contract('QuadToken', ([_, owner0, owner1, owner2, recipient, protocolOwner, lrgOwner]) => {
   const qk1 = new BinaryQuadkey.fromQuadkey("0231010202322300");
   const qk2 = new BinaryQuadkey.fromQuadkey("0331010202322300");
   const tile1 = qk1.toString()
@@ -105,26 +105,7 @@ contract('QuadToken', ([_, owner0, owner1, owner2, recipient]) => {
     assert.equal(owner1, result)
   })
 
-  describe('Metadata', () => {
-    it('should be able to update many land metadata', async function _() {
-      // should have metadata assigned when assigning new parcel
-      await this.token.publicMinting(owner0, [tile1, tile2])
-      const l2b4 = await this.token.getTokenMetadata(1, tile2)
-      l2b4.should.be.equal('')
-
-      // should be able to update using helper function
-      await this.token.updateTokenMetadata(1, tile2, 'wat', { from: owner0, gasPrice: 0}).should.be.fulfilled
-      const l2b42 = await this.token.getTokenMetadata(1, tile2)
-      l2b42.should.be.equal('wat')
-
-      // should be able to update many metadata at once
-      const result = await this.token.updateManyTokenMetadata(1, [tile1, tile2], 'blah', { from: owner0, gasPrice: 0 }).should.be.fulfilled
-      const l1 = await this.token.getTokenMetadata(1,tile1)
-      const l2 = await this.token.getTokenMetadata(1,tile2)
-      l1.should.be.equal('blah')
-      l2.should.be.equal('blah')
-    })
-  })
+ 
 
   it('should be able to build a unique group id', async function _() {
     const inOrder = [1, 2, 3, 4, 5]

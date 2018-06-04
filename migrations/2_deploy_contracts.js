@@ -67,26 +67,33 @@ function deployLibraries(deployer) {
   })
 }
 
-module.exports = function _(deployer, network, [owner]) {
+module.exports = function _(deployer, network, [owner1, owner2, owner3]) {
   let goldContract = undefined
+  let quadTokenOwner = owner1
+  let lrgTokenOwner = owner2
+  let landRushOwner = owner3
+  console.log("QuadToken owner", quadTokenOwner)
+  console.log("LRGToken owner", lrgTokenOwner)
+  console.log("LandRushCrowdsale owner", landRushOwner)
+
   return deployLibraries(deployer).then(() => {
-    return deployer.deploy(QuadToken, { from: owner })
+    return deployer.deploy(QuadToken, { from: quadTokenOwner })
   }).then(() => {
-    return deployer.deploy(LRGToken, { from: owner })
+    return deployer.deploy(LRGToken, { from: lrgTokenOwner })
   }).then((goldToken) => {
-    return deployLandSale(deployer, owner)
+    return deployLandSale(deployer, landRushOwner)
   }).then(() => {
     return QuadToken.deployed()
   }).then(token => {
-    return token.setApprovedMinter(LandRushCrowdsale.address, true, {from: owner})
+    return token.setApprovedMinter(LandRushCrowdsale.address, true, {from: quadTokenOwner})
   }).then(() => {
     return LRGToken.deployed()
   }).then((contract) => {
     goldContract = contract
     return goldContract.totalSupply()
   }).then(supply => {
-    console.log("SUPPLY", supply)
-    return goldContract.approve(LandRushCrowdsale.address, supply/2)
+    console.log("LRG SUPPLY", supply.toString())
+    return goldContract.approve(LandRushCrowdsale.address, supply/2, {from: lrgTokenOwner})
   })
   .catch(console.log)
 }

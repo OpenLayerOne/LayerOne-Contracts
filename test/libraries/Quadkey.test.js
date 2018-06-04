@@ -88,10 +88,10 @@ contract('Quadkey', function ([_, crowdsaleOwner]) {
         let zoom16 = (new BinaryQuadkey.fromQuadkey("0231010202322301")).toString()
         let zoom15 = (new BinaryQuadkey.fromQuadkey("023101020232230")).toString()
         let zoom14 = (new BinaryQuadkey.fromQuadkey("02310102023223")).toString()
-        let z1 = await this.qk.quadkeyZoomOut(zoom17, 0);
-        let z2 = await this.qk.quadkeyZoomOut(zoom17, 1);
-        let z3 = await this.qk.quadkeyZoomOut(zoom17, 2);
-        let z4 = await this.qk.quadkeyZoomOut(zoom17, 3);
+        let z1 = await this.qk.zoomOut(zoom17, 0);
+        let z2 = await this.qk.zoomOut(zoom17, 1);
+        let z3 = await this.qk.zoomOut(zoom17, 2);
+        let z4 = await this.qk.zoomOut(zoom17, 3);
 
         z1.should.be.bignumber.equal(zoom17);
         z2.should.be.bignumber.equal(zoom16);

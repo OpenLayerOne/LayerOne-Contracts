@@ -1,7 +1,6 @@
 pragma solidity ^0.4.21;
 
 import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /*
     Land Rush Gold (LRG) Token contract
@@ -11,18 +10,18 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
     "Here's 50 Large."
     Initial supply 200,000,000.00 Large
 */
-contract LRGToken is StandardToken, Ownable {
-    uint8 public constant decimals = 2;
+contract LRGToken is StandardToken {
+    uint8 public constant decimals = 18;
     string public constant name = "Land Rush Gold";
     string public constant symbol = "LRG";
 
     /*
         Land Rush Gold (LRG) Token contract
-        This constructs the contract and assigns initial supply to the creator
+        This constructs the contract and assigns initial supply to a vault
     */
      function LRGToken() public {
         totalSupply_ = 200000000 * 10**uint(decimals);
-        balances[owner] = totalSupply_;
-        emit Transfer(address(0), owner, totalSupply_);
+        balances[msg.sender] = totalSupply_;
+        emit Transfer(address(0), msg.sender, totalSupply_);
     }
 }

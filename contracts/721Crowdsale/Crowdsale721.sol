@@ -54,7 +54,7 @@ contract Crowdsale721 {
     nftContract_ = Batchable721Token(_nftContract);
   }
   
-  event LandsalePurchase(address indexed purchaser, address indexed beneficiary, uint value, uint numTokens);
+  event LandsalePurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 numTokens);
 
   // low level token purchase function
   function buyTokens(

@@ -3,15 +3,24 @@ pragma solidity ^0.4.21;
 import "./Batchable721Token.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "../libraries/QuadkeyLib.sol";
+import "./LRGToken.sol";
 
 contract QuadToken is Batchable721Token {
   using SafeMath for uint256;
 
-  // Contracts or people that own data protocols on the 
-  mapping(uint256 => address) internal protocolOwners;
-  mapping (uint256 => mapping (uint256 => string)) internal protocolTokenMetadata;
 
   event MetadataUpdated(uint256 indexed protocol, uint256 indexed tokenId, address indexed owner, string metadata);
+
+  struct MetadataProtocol {
+    uint256 rewardCreate;
+    uint256 rewardUpdate;
+    address wallet; // must approve this contract to do transferFrom
+    address owner;
+    address erc20Address;
+    mapping (uint256 => string) tokenMetadata;
+  }
+
+  mapping (uint256 => MetadataProtocol) public metadataProtocols;
 
   function QuadToken() 
     public 
@@ -59,23 +68,62 @@ contract QuadToken is Batchable721Token {
   }
 
   /*
-    @dev Sets owner of a protocol.  For 3rd party protocol devs to control 
+    @dev Creates a metadata protocol.  For 3rd party protocol devs to control 
     their metadata associated with layer one quadtiles
     @param _protocol - the protocol of the data
+    @param _rewardCreate - Reward for inserting new metadata
+    @param _rewardUpdate - Reward for updating metadata
+    @param _wallet - Source of the erc20 token funding
     @param _owner - who should own this protocol
+    @param _erc20Token - the address of the token contract to handle transfer
   */
-  function setProtocolOwner(
+  function createMetadataProtocol(
     uint256 _protocol,
-    address _owner
+    uint256 _rewardCreate,
+    uint256 _rewardUpdate,
+    address _wallet,
+    address _owner,
+    address _erc20Token
   ) 
-    onlyOwner
     public
   {
-    protocolOwners[_protocol] = _owner;
+    require(msg.sender != 0);
+    MetadataProtocol memory oldProtocol = metadataProtocols[_protocol];
+    require (oldProtocol.owner == 0);
+
+    MetadataProtocol memory protocol = MetadataProtocol(
+      _rewardCreate,
+      _rewardUpdate,
+      _wallet,
+      _owner,
+      _erc20Token
+    );
+
+    metadataProtocols[_protocol] = protocol;
   }
+
+  function updateReward( 
+      uint256 _protocol,
+      uint256 _rewardCreate,
+      uint256 _rewardUpdate,
+      address _wallet,
+      address _owner,
+      address _erc20Token
+    )
+      public 
+    {
+      MetadataProtocol storage oldProtocol = metadataProtocols[_protocol];
+      require (oldProtocol.owner == msg.sender);
+      oldProtocol.rewardCreate = _rewardCreate;
+      oldProtocol.rewardUpdate = _rewardUpdate;
+      oldProtocol.wallet = _wallet;
+      oldProtocol.owner = _owner;
+      oldProtocol.erc20Address = _erc20Token;
+    }
 
   /*
     @dev Updates tile's metadata for a given protocol.  
+    This will payout any rewards associated with the protocol
     Both the protocol owner and the tile owner has access to this data
     @param _protocol - the protocol of the data
     @param _tokenId - the id of the token
@@ -91,9 +139,25 @@ contract QuadToken is Batchable721Token {
   {
     require(QuadkeyLib.isValidQuadkey(_tokenId));
     bool isOwner = msg.sender == ownerOf(_tokenId);
-    bool isProtocolOwner = msg.sender == protocolOwners[_protocol];
+    MetadataProtocol storage protocol = metadataProtocols[_protocol];
+    bool isProtocolOwner = protocol.owner == msg.sender;
+    ERC20 erc20Address = ERC20(protocol.erc20Address);
+
     require(isOwner || isProtocolOwner);
-    protocolTokenMetadata[_tokenId][_protocol] = _metadata;
+    bytes memory tempEmptyStringTest = bytes(protocol.tokenMetadata[_tokenId]);
+    protocol.tokenMetadata[_tokenId] = _metadata;
+
+    if (tempEmptyStringTest.length == 0) {
+        // This is a new addition
+        if (protocol.rewardCreate > 0) {
+          erc20Address.transferFrom(protocol.wallet, msg.sender, protocol.rewardCreate);
+        }
+    } else {
+        // This is an update
+        if (protocol.rewardUpdate > 0) {
+          erc20Address.transferFrom(protocol.wallet, msg.sender, protocol.rewardUpdate);
+        }
+    }
     emit MetadataUpdated(_protocol, _tokenId, msg.sender, _metadata);
   }
 
@@ -110,7 +174,8 @@ contract QuadToken is Batchable721Token {
     view
     returns (string)
   {
-    return protocolTokenMetadata[_tokenId][_protocol];
+    MetadataProtocol storage protocol = metadataProtocols[_protocol];
+    return protocol.tokenMetadata[_tokenId];
   }
 
   bytes4 constant public InterfaceSignature_ERC165 = 0x01ffc9a7;
