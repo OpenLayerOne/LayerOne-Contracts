@@ -24,7 +24,7 @@ contract QuadToken is Batchable721Token {
 
   function QuadToken() 
     public 
-    ERC721Token("QuadToken", "QUAD")
+    ERC721Token("Layer One Land", "LOL")
   {
   }
 

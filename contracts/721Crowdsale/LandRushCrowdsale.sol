@@ -11,20 +11,21 @@ contract LandRushCrowdsale is Crowdsale721, Ownable {
 
     using SafeMath for uint256;
     
-    // Number of remaining whitelisted user slots
+    // Number of Tiles to be sold in the Land Rush Crowdsale
     uint32 public minTilesSold = 100000;
     LRGToken public goldContract_;
-
     uint256 public endPrice;
-
     /*
-        The crowdsale for Layer One 
-        @param _cap Has a cap, so that it ends when cap reached
+        The Land Rush crowdsale for Layer One 
+        @param _minTilesSold The number of tiles to sell in the crowdsale
         @param _landsaleStart when the first public purchase period should begin
         all dates will be relative this beginning.
-        @param _landsaleEnd when all crowdsale functionality is over
+        @param _landsaleEnd The price will drop linearly to endPrice at this date
+        @param _startPrice The starting price of crowdsale
+        @param _endPrice The price will drop linearly to this price
         @param _wallet the destination of purchase funds
         @param _nftContract The contract that holds the tile ownership information
+        @param _goldContract The contract that holds the LRG ownership information
     */
     function LandRushCrowdsale(
         uint32 _minTilesSold,
@@ -44,12 +45,20 @@ contract LandRushCrowdsale is Crowdsale721, Ownable {
         endPrice = _endPrice;
     }
 
-    // overriding Crowdsale#hasEnded to add cap logic
-    // @return true if crowdsale event has ended
+    /*
+        overriding Crowdsale hasEnded to limit to the number of tiles sold
+        @return true if total supply is over the minTilesSold
+    */
     function hasEnded() public view returns (bool) {
         return nftContract_.totalSupply() >= minTilesSold;
     }
 
+    /*
+        Validates the quadkeys are zoom 16 and in proper form
+        Validates the price is accurate to current price of dutch auction
+        Validates that the date is after the start time of the crowdsale
+        @return true if the above conditions are met
+    */
     function validPurchase(uint256[] _tokenIds) 
         internal 
         view 
@@ -70,39 +79,50 @@ contract LandRushCrowdsale is Crowdsale721, Ownable {
         return correctPayment && withinPeriod;
     }
 
+    /*
+      Calculates given the current supply of LRG, how much to distribute to token purchaser
+    */
     function numGoldToDistribute() 
         public
         view
-        returns (uint64)
+        returns (uint256)
     {
         uint256 supply = nftContract_.totalSupply();
         if (supply < 20000) {
-            return 2000;
+            return (2000);
         } else if (supply < 40000) {
-            return 1400;
+            return (1400);
         } else if (supply < 60000) {
-            return 900;
+            return (900);
         } else if (supply < 80000) {
-            return 500;
+            return (500);
         }
-        return 200;
+        return (200);
     }
 
-    // low level token purchase function
-  function buyTokens(
-    uint256[] _tokenIds,
-    address _beneficiary
-  ) 
-    public 
-    payable 
-  {
-    super.buyTokens(_tokenIds, _beneficiary);
-    
-    // transfer Gold Reward to beneficiary
-    goldContract_.transferFrom(owner, _beneficiary, _tokenIds.length.mul(numGoldToDistribute()));
-  }
+    /*
+        Calls to super buy tokens which calculates correct value, then distributes gold
+        Because LRG has 18 decimals, use ether helper to convert to correct distribution
+        @param _tokenIds the ids of the tokens to be purchased
+        @param _beneficiary recipient of the tokens
+    */
+    function buyTokens(
+        uint256[] _tokenIds,
+        address _beneficiary
+    ) 
+        public 
+        payable 
+    {
+        super.buyTokens(_tokenIds, _beneficiary);
 
-    // calculates dutch auction price from start of presale to now
+        // transfer Gold Reward to beneficiary
+        goldContract_.transferFrom(owner, _beneficiary, _tokenIds.length.mul(10**goldContract_.decimals()).mul(numGoldToDistribute()));
+    }
+
+    /*
+        Calculates dutch auction price from start of presale to now
+        @param _tokenIds the ids of the tokens to be purchased
+    */
     function price(uint256[] _tokenIds) 
         public
         view 

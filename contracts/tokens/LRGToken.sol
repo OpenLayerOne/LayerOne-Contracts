@@ -8,10 +8,10 @@ import "openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
     and will be brought into the market via LayerOne's Land Rush Game.
     Btw, fun fact, when you pay with this token, and you give someone 50 LRG you can say,
     "Here's 50 Large."
-    Initial supply 200,000,000.00 Large
+    Initial supply 200,000,000 Large
 */
 contract LRGToken is StandardToken {
-    uint8 public constant decimals = 18;
+    uint public constant decimals = 18;  // Same as ethereum!  We can use the ether conversion functions by doing this
     string public constant name = "Land Rush Gold";
     string public constant symbol = "LRG";
 
@@ -20,7 +20,7 @@ contract LRGToken is StandardToken {
         This constructs the contract and assigns initial supply to a vault
     */
      function LRGToken() public {
-        totalSupply_ = 200000000 * 10**uint(decimals);
+        totalSupply_ = 200000000 * 10**decimals;
         balances[msg.sender] = totalSupply_;
         emit Transfer(address(0), msg.sender, totalSupply_);
     }
