@@ -14,6 +14,7 @@ contract QuadToken is Batchable721Token {
   struct MetadataProtocol {
     uint256 rewardCreate;
     uint256 rewardUpdate;
+    uint256 allowanceRemaining;
     address wallet; // must approve this contract to do transferFrom
     address owner;
     address erc20Address;
@@ -53,15 +54,14 @@ contract QuadToken is Batchable721Token {
     @param _rewardCreate - Reward for inserting new metadata
     @param _rewardUpdate - Reward for updating metadata
     @param _wallet - Source of the erc20 token funding
-    @param _owner - who should own this protocol
     @param _erc20Token - the address of the token contract to handle transfer
   */
   function createMetadataProtocol(
     uint256 _protocol,
     uint256 _rewardCreate,
     uint256 _rewardUpdate,
+    uint256 _allowance,
     address _wallet,
-    address _owner,
     address _erc20Token
   ) 
     public
@@ -73,8 +73,9 @@ contract QuadToken is Batchable721Token {
     MetadataProtocol memory protocol = MetadataProtocol(
       _rewardCreate,
       _rewardUpdate,
+      _allowance,
       _wallet,
-      _owner,
+      msg.sender,
       _erc20Token
     );
 
@@ -85,6 +86,7 @@ contract QuadToken is Batchable721Token {
       uint256 _protocol,
       uint256 _rewardCreate,
       uint256 _rewardUpdate,
+      uint256 _allowanceRemaining,
       address _wallet,
       address _owner,
       address _erc20Token
@@ -95,6 +97,7 @@ contract QuadToken is Batchable721Token {
       require (oldProtocol.owner == msg.sender);
       oldProtocol.rewardCreate = _rewardCreate;
       oldProtocol.rewardUpdate = _rewardUpdate;
+      oldProtocol.allowanceRemaining = _allowanceRemaining;
       oldProtocol.wallet = _wallet;
       oldProtocol.owner = _owner;
       oldProtocol.erc20Address = _erc20Token;
@@ -128,12 +131,14 @@ contract QuadToken is Batchable721Token {
 
     if (tempEmptyStringTest.length == 0) {
         // This is a new addition
-        if (protocol.rewardCreate > 0) {
+        if (protocol.allowanceRemaining > protocol.rewardCreate && protocol.rewardCreate > 0) {
+          protocol.allowanceRemaining -= protocol.rewardCreate;
           erc20Address.transferFrom(protocol.wallet, msg.sender, protocol.rewardCreate);
         }
     } else {
         // This is an update
-        if (protocol.rewardUpdate > 0) {
+        if (protocol.allowanceRemaining > protocol.rewardUpdate &&  protocol.rewardUpdate > 0) {
+          protocol.allowanceRemaining -= protocol.rewardUpdate;
           erc20Address.transferFrom(protocol.wallet, msg.sender, protocol.rewardUpdate);
         }
     }

@@ -53,15 +53,16 @@ contract('QuadToken_Metadata', ([_, landContractOwner, owner1, metadataOwner, pr
         await this.token.createMetadataProtocol(protocolId, 
             this.createReward, 
             this.updateReward,
-            lrgOwner, 
-            protocolOwner,
-            this.lrgToken.address)
-        this.lrgToken.approve(this.token.address, 4000, {from: lrgOwner})
+            4000,
+            lrgOwner,
+            this.lrgToken.address, {from: protocolOwner})
+        await this.lrgToken.approve(this.token.address, 4000, {from: lrgOwner})
       })
       it('should be able to view protocol data', async function _() {
-        const [createReward, updateReward, wallet, owner, erc20address] = await this.token.metadataProtocols(protocolId)
+        const [createReward, updateReward, allowance, wallet, owner, erc20address] = await this.token.metadataProtocols(protocolId)
         createReward.should.be.bignumber.equal(this.createReward)
         updateReward.should.be.bignumber.equal(this.updateReward)
+        allowance.should.be.bignumber.equal(4000)
         wallet.should.be.equal(lrgOwner)
         owner.should.be.equal(protocolOwner)
         erc20address.should.be.equal(this.lrgToken.address)
@@ -70,9 +71,9 @@ contract('QuadToken_Metadata', ([_, landContractOwner, owner1, metadataOwner, pr
         await this.token.createMetadataProtocol(protocolId, 
             this.createReward, 
             this.updateReward,
-            landContractOwner, 
-            protocolOwner,
-            this.lrgToken.address).should.be.rejectedWith(EVMRevert)
+            4000,
+            lrgOwner,
+            this.lrgToken.address, {from: protocolOwner}).should.be.rejectedWith(EVMRevert)
       })
       it('owner should be able to update the reward', async function _() {
         const lrg2 = await LRGToken.new({from:lrgOwner});
@@ -80,13 +81,15 @@ contract('QuadToken_Metadata', ([_, landContractOwner, owner1, metadataOwner, pr
         await this.token.updateReward(protocolId, 
             3000, 
             2000,
+            5000,
             landContractOwner, 
             owner1,
             lrg2.address, {from: protocolOwner}).should.be.fulfilled
 
-        const [createReward, updateReward, wallet, owner, erc20address] = await this.token.metadataProtocols(protocolId)
+        const [createReward, updateReward, allowance, wallet, owner, erc20address] = await this.token.metadataProtocols(protocolId)
         createReward.should.be.bignumber.equal(3000)
         updateReward.should.be.bignumber.equal(2000)
+        allowance.should.be.bignumber.equal(5000)
         wallet.should.be.equal(landContractOwner)
         owner.should.be.equal(owner1)
         erc20address.should.be.equal(lrg2.address)

@@ -34,7 +34,7 @@ const makeQuadKey = function (token) {
 function deployLandSale(deployer, landSaleOwner) {
   const startTime = latestTime() + duration.seconds(1)
   const endTime = startTime + duration.days(21)
-  const startPrice = ether(.5)
+  const startPrice = ether(.1)
   const endPrice = ether(0.001)
   const minTilesSold = 100000
   const land = QuadToken.address
@@ -74,6 +74,7 @@ module.exports = function _(deployer, network, [owner1, owner2, owner3]) {
   let lrgTokenOwner = owner1
   let landRushOwner = owner1
   let nameProtocolOwner = lrgTokenOwner
+  let nameProtocolAllowance = 50000
   console.log("QuadToken owner", quadTokenOwner)
   console.log("LRGToken owner", lrgTokenOwner)
   console.log("LandRushCrowdsale owner", landRushOwner)
@@ -93,7 +94,9 @@ module.exports = function _(deployer, network, [owner1, owner2, owner3]) {
     goldContract = contract
     return landContract.setApprovedMinter(LandRushCrowdsale.address, true, {from: quadTokenOwner})
   }).then(() => {
-    return landContract.createMetadataProtocol(1, ether(2), 0, lrgTokenOwner, nameProtocolOwner, goldContract.address)
+    return landContract.createMetadataProtocol(1, ether(2), 0, ether(50000), lrgTokenOwner, goldContract.address, {from: nameProtocolOwner})
+  }).then(() => {
+    return goldContract.approve(landContract.address, ether(50000), {from: lrgTokenOwner})
   }).then((contract) => {
     return goldContract.totalSupply()
   }).then(supply => {
